@@ -54,11 +54,11 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 		populate();//準備ItemizedOverly建構後，所需的處理動作
 	}
 
-//	public void addOverlay(OverlayItem overlay) 
-//	{
-//		items.add(overlay);
-//	    populate();//準備ItemizedOverly建構後，所需的處理動作
-//	}
+	public void addOverlay(OverlayItem overlay) 
+	{
+		items.add(overlay);
+	    populate();//準備ItemizedOverly建構後，所需的處理動作
+	}
 	
 	@Override
 	protected OverlayItem createItem(int i) //被populate()呼叫

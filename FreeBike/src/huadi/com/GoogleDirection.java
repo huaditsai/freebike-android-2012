@@ -87,8 +87,8 @@ class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 	{
 		int len = poly.length();
 		int index = 0;
-		int lat = 0;
-		int lng = 0;
+		int lat = 0;//½n«×
+		int lng = 0;//¸g«×
 
 		while (index < len)
 		{

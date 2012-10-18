@@ -18,8 +18,6 @@ import com.google.android.maps.Projection;
 public class DrawOverlay extends Overlay
 {
 	private List<GeoPoint> mGeoPoints = new ArrayList<GeoPoint>();
-	private static final int ALPHA = 120;
-	private static final float STROKE = 10;
 	private final Path path;
 	private final Point p;
 	private final Paint paint;
@@ -37,11 +35,10 @@ public class DrawOverlay extends Overlay
 	{
 		super.draw(canvas, mapView, shadow);
 
-		//線的樣式
-		paint.setColor(Color.argb(120, 70, 50, 200));
-		paint.setAlpha(ALPHA);
+		paint.setColor(Color.argb(120, 70, 50, 200));//顏色
+		paint.setAlpha(120);//透明度
 		paint.setAntiAlias(true);
-		paint.setStrokeWidth(STROKE);//邊的寬度
+		paint.setStrokeWidth(10);//邊的寬度
 		paint.setStyle(Paint.Style.STROKE);
 
 		Projection proj = mapView.getProjection();//投影
@@ -50,7 +47,7 @@ public class DrawOverlay extends Overlay
 		proj.toPixels(it.next(), p);
 		path.moveTo(p.x, p.y);
 
-		while (it.hasNext())
+		while (it.hasNext())//如果有下一個點就畫過去
 		{
 			proj.toPixels(it.next(), p);
 			path.lineTo(p.x, p.y);
