@@ -21,12 +21,12 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.googlemap.R;
+import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
 
 public class MainActivity extends MapActivity implements LocationListener
 {
@@ -91,13 +91,13 @@ public class MainActivity extends MapActivity implements LocationListener
 		controller.setZoom(17);//全球1 ~ 街景21
 		
 		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);
+		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this); //模擬器會出錯
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
     }
 
 	private void setupMap()
 	{
-		//GeoPoint ntue = new GeoPoint( (int)(25.023389 * 1000000), (int)(121.545208 * 1000000) );		
+		//GeoPoint ntue = new GeoPoint( (int)(25.023389 * 1000000), (int)(121.545208 * 1000000) );
 		//controller.animateTo(ntue);
 		
 		List<Overlay> overlays = mapView.getOverlays();//定位點
@@ -108,10 +108,9 @@ public class MainActivity extends MapActivity implements LocationListener
 								{
 						   			public void run() //產生一個執行緒執行
 						   			{
-						   				List<Overlay> overlays = mapView.getOverlays();//定位點
-						   				OverlayItem oi = new OverlayItem(myLayer.getMyLocation(), "", "");
-						   				mapOverlay.addOverlay(oi);
-						   				overlays.add(mapOverlay);
+//						   				GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());
+//						   				new GoogleDirection(myLayer, mapView).execute(myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
+//						   						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
 						   			    controller.animateTo(myLayer.getMyLocation());//將地點置中
 						   			}
 						   		});
@@ -133,13 +132,24 @@ public class MainActivity extends MapActivity implements LocationListener
 		locationMgr = (LocationManager) getSystemService(LOCATION_SERVICE);//取得系統提供的定位服務
 		Location location = locationMgr.getLastKnownLocation("gps");//使用GPS來定位
 		
-		if (location != null) 
+		try
 		{
-			new GoogleDirection(myLayer, mapView).execute(location.getLatitude() + "," + location.getLongitude(), "");
-		} 
-		else
+			if (location != null) 
+			{
+				GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());
+					new GoogleDirection(myLayer, mapView).execute(location.getLatitude() + "," + location.getLongitude(), 
+							minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
+				//new GoogleDirection(myLayer, mapView).execute(location.getLatitude() + "," + location.getLongitude(), "");
+			} 
+			else
+			{
+				Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
+				locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
+			}
+		}
+		catch (Exception e)
 		{
-			Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
+			Log.v("1",""+e);
 		}
 	}
 	
@@ -147,8 +157,8 @@ public class MainActivity extends MapActivity implements LocationListener
    	protected void onResume() 
 	{
    		super.onResume();
-   		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
-		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
+   		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
+		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
    		myLayer.enableMyLocation();//啟動更新
    	}   	
    	@Override

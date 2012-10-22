@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -14,7 +15,7 @@ import com.google.android.maps.OverlayItem;
 public class MapOverlay extends ItemizedOverlay<OverlayItem>
 {	
 	//宣告items列表，負責儲存圖標列表
-	private List<OverlayItem> items = new ArrayList<OverlayItem>();
+	private static List<OverlayItem> items = new ArrayList<OverlayItem>();
 	Context mcontext;//為了用MainActivity叫Toast等
 	
 	//GeoPoint  = new GeoPoint( (int)( * 1000000), (int)( * 1000000) );
@@ -78,5 +79,36 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 		Toast.makeText(mcontext, "這裡是 " + items.get(index).getSnippet(), Toast.LENGTH_SHORT).show();
 		return true;		
 	}
+	
+	public static GeoPoint minDistience(GeoPoint userPoint)//計算離自己最近的租賃站
+	{
+		Location locationA = new Location("point A");
+		locationA.setLatitude(userPoint.getLatitudeE6() / 1E6);  
+		locationA.setLongitude(userPoint.getLongitudeE6() / 1E6);  
 
+		Location locationB = new Location("point B");
+		
+		float distance[] = new float[items.size()];
+
+		for(int i = 0 ; i < items.size() ; i++)
+		{
+			locationB.setLatitude(items.get(i).getPoint().getLatitudeE6() / 1E6);  
+			locationB.setLongitude(items.get(i).getPoint().getLongitudeE6() / 1E6);
+			
+			distance[i] = locationA.distanceTo(locationB);
+		}
+		
+		float min = distance[0];
+		int minI = 0;
+		
+		for(int i=0 ; i<distance.length ; i++)
+		{
+			if(distance[i] <= min)
+			{
+				min = distance[i];
+				minI = i;
+			}
+		}
+		return items.get(minI).getPoint();
+	}
 }
