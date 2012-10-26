@@ -67,7 +67,7 @@ class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 				strResult = EntityUtils.toString(httpResponse.getEntity());
 
 				JSONObject jsonObject = new JSONObject(strResult);
-				JSONArray routeObject = jsonObject.getJSONArray("routes");
+				JSONArray routeObject = jsonObject.getJSONArray("routes");//route 會指出具名的路線 (例如「US 101」)
 				String polyline = routeObject.getJSONObject(0).getJSONObject("overview_polyline").getString("points");
 
 				if (polyline.length() > 0)
@@ -83,7 +83,8 @@ class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 		return geoPoints;
 	}
 
-	private void decodePolylines(String poly)
+	//https://developers.google.com/maps/documentation/utilities/polylinealgorithm?hl=zh-TW
+	private void decodePolylines(String poly)//對類似這樣 myywCkv~dVQzSIlDA~DEvIMlPAvAf@@ 的東西解碼
 	{
 		int len = poly.length();
 		int index = 0;

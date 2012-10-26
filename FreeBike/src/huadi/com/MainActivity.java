@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,18 +20,25 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
-
-import com.example.googlemap.R;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 
 public class MainActivity extends MapActivity implements LocationListener
 {
+	private SensorManager sensorManager;
+	private Sensor orientation;
+    private RotateView rotateView;
+    
+    private boolean isRotateMap = true; 
+    
 	private MapView mapView;  //宣告map物件
 	private MapController controller;
 	
@@ -37,6 +46,7 @@ public class MainActivity extends MapActivity implements LocationListener
 	
 	private MyLocationOverlay myLayer;
 	
+	private SelfOverlay selfOverlay;
 	private MapOverlay mapOverlay;
 	Drawable pin; //地圖上的釘點圖
 	
@@ -48,7 +58,7 @@ public class MainActivity extends MapActivity implements LocationListener
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);   
+        //setContentView(R.layout.main);   
         
         findViews();    	
     	
@@ -81,13 +91,23 @@ public class MainActivity extends MapActivity implements LocationListener
 		}
     }     	
 
-    private void findViews() 
+	@SuppressWarnings("deprecation")
+	private void findViews() 
     {
-    	mapView = (MapView) findViewById(R.id.mapView);
+    	sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+    	orientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+    	
+        rotateView = new RotateView(this);
+        mapView = new MapView(this, "0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"); // API KEY
+        rotateView.addView(mapView);
+        
+        setContentView(rotateView); 
+        
+    	//mapView = (MapView) findViewById(R.id.mapView);
 		controller = mapView.getController(); //設定controller物件至map
 		
-		mapView.setTraffic(true);//一般 mapView.setSatellite(true)//衛星 mapView.setStreetView(true)//街景
-		//mapView.setBuiltInZoomControls(true);//縮放的按鈕
+		mapView.setTraffic(false);//一般 mapView.setSatellite(true)//衛星 mapView.setStreetView(true)//街景
+		mapView.setBuiltInZoomControls(true);//縮放的按鈕
 		controller.setZoom(17);//全球1 ~ 街景21
 		
 		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -112,9 +132,43 @@ public class MainActivity extends MapActivity implements LocationListener
 //						   				new GoogleDirection(myLayer, mapView).execute(myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
 //						   						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
 						   			    controller.animateTo(myLayer.getMyLocation());//將地點置中
+						   			    
+						   			    Drawable self = getResources().getDrawable(R.drawable.self);
+						   			    self.setBounds(-self.getMinimumWidth()/2, -self.getMinimumHeight(), 0, 0);//以圖片中下為基準
+						   			    selfOverlay = new SelfOverlay(self);
+						   			    OverlayItem lo = new OverlayItem(myLayer.getMyLocation(),"", "") ;
+						   			    selfOverlay.addOverlay(lo);
+						   			    mapView.getOverlays().add(selfOverlay);
 						   			}
 						   		});
 		overlays.add(myLayer); //將locationLayer加入(add)overlays，才能顯示地圖
+		
+		mapView.setClickable(true);
+        mapView.setEnabled(true);
+        
+        
+        mapView.setOnTouchListener(new View.OnTouchListener() // 地圖旋轉與否控制
+        {
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				if( event.getAction() == MotionEvent.ACTION_UP ) 
+				{
+					if( isRotateMap ) // 關閉電子羅盤
+					{						
+						sensorManager.unregisterListener(rotateView);
+						isRotateMap = false;
+					} 
+					else // 啟動電子羅盤
+					{						
+						sensorManager.registerListener(rotateView, orientation, SensorManager.SENSOR_DELAY_UI);
+						isRotateMap = true;
+					}
+				}
+				return true;
+				// return super.onTouchEvent(event);
+			}
+		});
 	}
 	private void drawPin()
 	{
@@ -159,13 +213,21 @@ public class MainActivity extends MapActivity implements LocationListener
    		super.onResume();
    		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
+		
+		if( isRotateMap )// 啟動電子羅盤
+		{			
+			sensorManager.registerListener(rotateView, orientation, SensorManager.SENSOR_DELAY_UI);
+		}
+		
    		myLayer.enableMyLocation();//啟動更新
    	}   	
-   	@Override
+
+	@Override
    	protected void onPause() 
    	{
    		super.onPause();
    		myLayer.disableMyLocation();//關閉更新
+   		sensorManager.unregisterListener(rotateView);
    	}
 
 	@Override

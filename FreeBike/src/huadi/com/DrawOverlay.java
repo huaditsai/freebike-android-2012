@@ -21,6 +21,8 @@ public class DrawOverlay extends Overlay
 	private final Path path;
 	private final Point p;
 	private final Paint paint;
+	
+	SmoothCanvas smoothCanvas = new SmoothCanvas();
 
 	public DrawOverlay(List<GeoPoint> geoPoints)
 	{
@@ -34,7 +36,7 @@ public class DrawOverlay extends Overlay
 	public void draw(Canvas canvas, MapView mapView, boolean shadow)
 	{
 		super.draw(canvas, mapView, shadow);
-
+		
 		paint.setColor(Color.argb(120, 70, 50, 200));//ÃC¦â
 		paint.setAlpha(120);//³z©ú«×
 		paint.setAntiAlias(true);
