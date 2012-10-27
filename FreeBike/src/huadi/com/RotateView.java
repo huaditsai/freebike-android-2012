@@ -2,38 +2,32 @@ package huadi.com;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
+import android.hardware.SensorListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-
-public class RotateView  extends ViewGroup implements SensorEventListener 
-{
+@SuppressWarnings("deprecation")
+public class RotateView  extends ViewGroup implements SensorListener {
     private static final float SQ2 = 1.414213562373095f; // 2 的平方根 (sqrt)
     private final SmoothCanvas mCanvas = new SmoothCanvas();
     private float mHeading = 0;
 
-    public RotateView(Context context) 
-    {
+    public RotateView(Context context) {
         super(context);
     }
     
-    public void onSensorChanged(int sensor, float[] values)// 當 Senser 數據更動時 
-    {
+    // 當 Senser 數據更動時
+    public void onSensorChanged(int sensor, float[] values) {
         //Log.d(TAG, "x: " + values[0] + "y: " + values[1] + "z: " + values[2]);
-        synchronized (this) 
-        {
+        synchronized (this) {
             mHeading = values[0]; // 指定角度數據給 mHeading 變數
             invalidate(); // 廢止 : 清空角度數據有變動的通知指標
         }
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas)
-    {
+    protected void dispatchDraw(Canvas canvas) {
         canvas.save(Canvas.MATRIX_SAVE_FLAG); // 儲存目前的矩陣標記
         canvas.rotate(-mHeading, getWidth() * 0.5f, getHeight() * 0.5f); // 旋轉畫布 : 參數 :
         																 // -mHeading (旋轉度數) : 此例為 (-1) * mHeading ,
@@ -45,13 +39,11 @@ public class RotateView  extends ViewGroup implements SensorEventListener
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) 
-    {
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int width = getWidth();
         final int height = getHeight();
         final int count = getChildCount();
-        for (int i = 0; i < count; i++) 
-        {
+        for (int i = 0; i < count; i++) {
             final View view = getChildAt(i);
             final int childWidth = view.getMeasuredWidth(); // 指定子圖寬度為 View 實測寬度
             final int childHeight = view.getMeasuredHeight(); // 指定子圖高度為 View 的實測高度
@@ -64,51 +56,32 @@ public class RotateView  extends ViewGroup implements SensorEventListener
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int w = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
         int h = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
         int sizeSpec;
-        
-        if (w > h) // 如是 寬大於高
-        {        	
+        if (w > h) {
+        	// 如是 寬大於高
             sizeSpec = MeasureSpec.makeMeasureSpec((int) (w * SQ2), MeasureSpec.EXACTLY); // 以 width * 2 的平方根算出實測尺寸
-        } 
-        else 
-        {
+        } else {
+        	// 如非 寬大於高
             sizeSpec = MeasureSpec.makeMeasureSpec((int) (h * SQ2), MeasureSpec.EXACTLY); // 以 height * 2 的平方根算出實測尺寸
         }
-        
         final int count = getChildCount();
-        for (int i = 0; i < count; i++) 
-        {
+        for (int i = 0; i < count; i++) {
             getChildAt(i).measure(sizeSpec, sizeSpec);
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) 
-    {
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // TODO: rotate events too
         return super.dispatchTouchEvent(ev);
     }
 
-    public void onAccuracyChanged(int sensor, int accuracy) 
-    {
-        // TODO Auto-generated method stub        
+    public void onAccuracyChanged(int sensor, int accuracy) {
+        // TODO Auto-generated method stub
+        
     }
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onSensorChanged(SensorEvent event)
-	{
-		// TODO Auto-generated method stub
-		
-	}
 }

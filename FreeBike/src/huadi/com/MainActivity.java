@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -34,7 +33,7 @@ import com.google.android.maps.OverlayItem;
 public class MainActivity extends MapActivity implements LocationListener
 {
 	private SensorManager sensorManager;
-	private Sensor orientation;
+	//private Sensor orientation;
     private RotateView rotateView;
     
     private boolean isRotateMap = true; 
@@ -91,11 +90,11 @@ public class MainActivity extends MapActivity implements LocationListener
 		}
     }     	
 
-	@SuppressWarnings("deprecation")
+
 	private void findViews() 
     {
     	sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-    	orientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+    	//orientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
     	
         rotateView = new RotateView(this);
         mapView = new MapView(this, "0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"); // API KEY
@@ -133,12 +132,13 @@ public class MainActivity extends MapActivity implements LocationListener
 //						   						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
 						   			    controller.animateTo(myLayer.getMyLocation());//將地點置中
 						   			    
-						   			    Drawable self = getResources().getDrawable(R.drawable.self);
-						   			    self.setBounds(-self.getMinimumWidth()/2, -self.getMinimumHeight(), 0, 0);//以圖片中下為基準
-						   			    selfOverlay = new SelfOverlay(self);
-						   			    OverlayItem lo = new OverlayItem(myLayer.getMyLocation(),"", "") ;
-						   			    selfOverlay.addOverlay(lo);
-						   			    mapView.getOverlays().add(selfOverlay);
+						   			    //行走時會出現藍點點，所以加了也沒用，會被蓋過
+//						   			    Drawable self = getResources().getDrawable(R.drawable.self);
+//						   			    self.setBounds(-self.getMinimumWidth()/2, -self.getMinimumHeight(), 0, 0);//以圖片中下為基準
+//						   			    selfOverlay = new SelfOverlay(self);
+//						   			    OverlayItem lo = new OverlayItem(myLayer.getMyLocation(),"", "") ;
+//						   			    selfOverlay.addOverlay(lo);
+//						   			    mapView.getOverlays().add(selfOverlay);
 						   			}
 						   		});
 		overlays.add(myLayer); //將locationLayer加入(add)overlays，才能顯示地圖
@@ -149,6 +149,7 @@ public class MainActivity extends MapActivity implements LocationListener
         
         mapView.setOnTouchListener(new View.OnTouchListener() // 地圖旋轉與否控制
         {
+			@SuppressWarnings("deprecation")
 			@Override
 			public boolean onTouch(View v, MotionEvent event)
 			{
@@ -161,7 +162,7 @@ public class MainActivity extends MapActivity implements LocationListener
 					} 
 					else // 啟動電子羅盤
 					{						
-						sensorManager.registerListener(rotateView, orientation, SensorManager.SENSOR_DELAY_UI);
+						sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
 						isRotateMap = true;
 					}
 				}
@@ -207,6 +208,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
    	protected void onResume() 
 	{
@@ -216,12 +218,13 @@ public class MainActivity extends MapActivity implements LocationListener
 		
 		if( isRotateMap )// 啟動電子羅盤
 		{			
-			sensorManager.registerListener(rotateView, orientation, SensorManager.SENSOR_DELAY_UI);
+			sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
 		}
 		
    		myLayer.enableMyLocation();//啟動更新
    	}   	
 
+	@SuppressWarnings("deprecation")
 	@Override
    	protected void onPause() 
    	{
