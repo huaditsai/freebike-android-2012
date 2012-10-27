@@ -21,6 +21,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -28,7 +30,6 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
 
 public class MainActivity extends MapActivity implements LocationListener
 {
@@ -45,7 +46,7 @@ public class MainActivity extends MapActivity implements LocationListener
 	
 	private MyLocationOverlay myLayer;
 	
-	private SelfOverlay selfOverlay;
+	//private SelfOverlay selfOverlay;
 	private MapOverlay mapOverlay;
 	Drawable pin; //地圖上的釘點圖
 	
@@ -58,6 +59,9 @@ public class MainActivity extends MapActivity implements LocationListener
     {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);   
+        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);//全螢幕
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         
         findViews();    	
     	
@@ -110,7 +114,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		controller.setZoom(17);//全球1 ~ 街景21
 		
 		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this); //模擬器會出錯
+		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this); //模擬器會出錯
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
     }
 
@@ -213,7 +217,7 @@ public class MainActivity extends MapActivity implements LocationListener
    	protected void onResume() 
 	{
    		super.onResume();
-   		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
+   		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
 		
 		if( isRotateMap )// 啟動電子羅盤
