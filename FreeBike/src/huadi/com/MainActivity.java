@@ -19,10 +19,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -33,40 +32,36 @@ import com.google.android.maps.Overlay;
 
 public class MainActivity extends MapActivity implements LocationListener
 {
+	boolean isOkStatu = false;
 	private SensorManager sensorManager;
-	//private Sensor orientation;
-    private RotateView rotateView;
-    
-    private boolean isRotateMap = true; 
+    private RotateView rotateView;    
+    private boolean isRotateMap = false; 
     
 	private MapView mapView;  //宣告map物件
 	private MapController controller;
 	
-	private LocationManager locationMgr;
-	
+	private LocationManager locationMgr;	
 	private MyLocationOverlay myLayer;
 	
-	//private SelfOverlay selfOverlay;
 	private MapOverlay mapOverlay;
 	Drawable pin; //地圖上的釘點圖
 	
 	protected static final int Bike_Timer = Menu.FIRST;//Menu
 	protected static final int Show_BikeStation = Menu.FIRST+1;
 	
+	Button btnRotate;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.main);   
-        
-        requestWindowFeature(Window.FEATURE_NO_TITLE);//全螢幕
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        
-        findViews();    	
-    	
-    	LocationManager status = (LocationManager)(this.getSystemService(Context.LOCATION_SERVICE));		
-		if (!status.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        //setContentView(R.layout.main);
+        findViews();
+    }     	
+    
+    private void initMap()
+    {
+    	if (!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER))
 		{
 			new AlertDialog.Builder(MainActivity.this).setTitle("地圖工具")
 			.setMessage("您尚未開啟定位服務，要前往設定頁面啟動定位服務嗎?")
@@ -88,23 +83,24 @@ public class MainActivity extends MapActivity implements LocationListener
 		}
 		else
 		{
+			isOkStatu = true;
 			setupMap();
 			drawPin();
 			updateStat();
 		}
-    }     	
-
+    }
 
 	private void findViews() 
     {
     	sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-    	//orientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
     	
         rotateView = new RotateView(this);
         mapView = new MapView(this, "0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"); // API KEY
         rotateView.addView(mapView);
         
+        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(rotateView); 
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title);
         
     	//mapView = (MapView) findViewById(R.id.mapView);
 		controller = mapView.getController(); //設定controller物件至map
@@ -114,7 +110,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		controller.setZoom(17);//全球1 ~ 街景21
 		
 		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this); //模擬器會出錯
+		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
     }
 
@@ -127,53 +123,42 @@ public class MainActivity extends MapActivity implements LocationListener
 		myLayer = new MyLocationOverlay(this, mapView);
 		myLayer.enableCompass();//顯示羅盤
 		myLayer.enableMyLocation();//啟動更新
-		myLayer.runOnFirstFix(new Runnable()//位置資訊更新時
-								{
-						   			public void run() //產生一個執行緒執行
-						   			{
-//						   				GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());
-//						   				new GoogleDirection(myLayer, mapView).execute(myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
-//						   						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
-						   			    controller.animateTo(myLayer.getMyLocation());//將地點置中
-						   			    
-						   			    //行走時會出現藍點點，所以加了也沒用，會被蓋過
-//						   			    Drawable self = getResources().getDrawable(R.drawable.self);
-//						   			    self.setBounds(-self.getMinimumWidth()/2, -self.getMinimumHeight(), 0, 0);//以圖片中下為基準
-//						   			    selfOverlay = new SelfOverlay(self);
-//						   			    OverlayItem lo = new OverlayItem(myLayer.getMyLocation(),"", "") ;
-//						   			    selfOverlay.addOverlay(lo);
-//						   			    mapView.getOverlays().add(selfOverlay);
-						   			}
-						   		});
+		myLayer.runOnFirstFix(
+				new Runnable()//位置資訊更新時
+				{
+		   			public void run() //產生一個執行緒執行
+		   			{
+		   			    controller.animateTo(myLayer.getMyLocation());//將地點置中
+		   			}
+		   		});
 		overlays.add(myLayer); //將locationLayer加入(add)overlays，才能顯示地圖
 		
 		mapView.setClickable(true);
         mapView.setEnabled(true);
         
         
-        mapView.setOnTouchListener(new View.OnTouchListener() // 地圖旋轉與否控制
+        btnRotate = (Button) findViewById(R.id.btnRotate);        
+        btnRotate.setOnClickListener(new Button.OnClickListener() 
         {
-			@SuppressWarnings("deprecation")
+            @SuppressWarnings("deprecation")
 			@Override
-			public boolean onTouch(View v, MotionEvent event)
-			{
-				if( event.getAction() == MotionEvent.ACTION_UP ) 
-				{
-					if( isRotateMap ) // 關閉電子羅盤
-					{						
-						sensorManager.unregisterListener(rotateView);
-						isRotateMap = false;
-					} 
-					else // 啟動電子羅盤
-					{						
-						sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
-						isRotateMap = true;
-					}
+            public void onClick(View view) 
+            {
+            	if( isRotateMap ) // 關閉電子羅盤
+				{						
+					sensorManager.unregisterListener(rotateView);
+					isRotateMap = false;
+					btnRotate.setText(R.string.rotate_start);
+				} 
+				else // 啟動電子羅盤
+				{						
+					sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
+					isRotateMap = true;
+					btnRotate.setText(R.string.rotate_stop);
 				}
-				return true;
-				// return super.onTouchEvent(event);
-			}
-		});
+            }
+        });
+        
 	}
 	private void drawPin()
 	{
@@ -188,23 +173,15 @@ public class MainActivity extends MapActivity implements LocationListener
 	
 	private void updateStat()
 	{
-		locationMgr = (LocationManager) getSystemService(LOCATION_SERVICE);//取得系統提供的定位服務
-		Location location = locationMgr.getLastKnownLocation("gps");//使用GPS來定位
+		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
+		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
 		
 		try
 		{
-			if (location != null) 
-			{
-				GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());
-					new GoogleDirection(myLayer, mapView).execute(location.getLatitude() + "," + location.getLongitude(), 
-							minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
-				//new GoogleDirection(myLayer, mapView).execute(location.getLatitude() + "," + location.getLongitude(), "");
-			} 
-			else
-			{
-				Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
-				locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
-			}
+			GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());
+				new GoogleDirection(myLayer, mapView).execute(
+						myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
+						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
 		}
 		catch (Exception e)
 		{
@@ -217,15 +194,23 @@ public class MainActivity extends MapActivity implements LocationListener
    	protected void onResume() 
 	{
    		super.onResume();
-   		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
-		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
-		
-		if( isRotateMap )// 啟動電子羅盤
-		{			
-			sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
+   		
+   		if(isOkStatu)
+   		{
+	   		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
+			locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
+			
+			if( isRotateMap )// 啟動電子羅盤
+			{			
+				sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
+			}
+			
+	   		myLayer.enableMyLocation();//啟動更新
+   		}
+   		else 
+   		{
+			initMap();
 		}
-		
-   		myLayer.enableMyLocation();//啟動更新
    	}   	
 
 	@SuppressWarnings("deprecation")
@@ -233,8 +218,12 @@ public class MainActivity extends MapActivity implements LocationListener
    	protected void onPause() 
    	{
    		super.onPause();
-   		myLayer.disableMyLocation();//關閉更新
-   		sensorManager.unregisterListener(rotateView);
+   		if(isOkStatu)
+   		{
+   			locationMgr.removeUpdates(MainActivity.this);
+   			myLayer.disableMyLocation();//關閉更新
+   			sensorManager.unregisterListener(rotateView);
+   		}
    	}
 
 	@Override
@@ -291,27 +280,7 @@ public class MainActivity extends MapActivity implements LocationListener
 	@Override //當GPS或網路關閉
 	public void onProviderDisabled(String provider)
 	{
-		LocationManager status = (LocationManager)(this.getSystemService(Context.LOCATION_SERVICE));
-		if (!status.isProviderEnabled(LocationManager.GPS_PROVIDER))
-		{
-			new AlertDialog.Builder(MainActivity.this).setTitle("地圖工具")
-			.setMessage("您尚未開啟定位服務，要前往設定頁面啟動定位服務嗎？")
-			.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog, int which)
-						{
-							startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));//開啟一個Activity，將使用者帶到定位設定頁面
-						}
-					})
-			.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog, int which)
-						{
-							Toast.makeText(MainActivity.this, "未開啟定位服務，無法使用本工具!!", Toast.LENGTH_SHORT).show();
-						}
-					})
-			.show();
-		}		
+		// TODO Auto-generated method stub
 	}
 	@Override //當GPS或網路開啟
 	public void onProviderEnabled(String provider)
