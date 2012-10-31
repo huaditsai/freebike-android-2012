@@ -21,8 +21,7 @@ public final class R {
         public static final int you=0x7f020007;
     }
     public static final class id {
-        public static final int btnRotate=0x7f060002;
-        public static final int button1=0x7f060001;
+        public static final int btnRotate=0x7f060001;
         public static final int mapView=0x7f060000;
     }
     public static final class layout {

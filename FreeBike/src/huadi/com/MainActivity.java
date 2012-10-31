@@ -144,16 +144,23 @@ public class MainActivity extends MapActivity implements LocationListener
 			@Override
             public void onClick(View view) 
             {
-            	if( isRotateMap ) // 關閉電子羅盤
+            	if( isRotateMap ) // 要關閉電子羅盤
 				{						
-					sensorManager.unregisterListener(rotateView);
+					sensorManager.unregisterListener(rotateView);					
+            		
+					float[] values = new float[1]; values[0] = 0;//使地圖北向上
+					rotateView.onSensorChanged(0, values);//使地圖北向上
+
 					isRotateMap = false;
+					mapView.setClickable(true);
 					btnRotate.setText(R.string.rotate_start);
 				} 
-				else // 啟動電子羅盤
-				{						
+				else // 要啟動電子羅盤
+				{
+					mapView.setStreetView(true);
 					sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
 					isRotateMap = true;
+					mapView.setClickable(false);
 					btnRotate.setText(R.string.rotate_stop);
 				}
             }

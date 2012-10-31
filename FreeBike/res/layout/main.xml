@@ -16,14 +16,4 @@
 		<!--DEBUG : 0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA-->
 		<!--Export : 0XKrp4dJ2ko7aETu9iR_FRc3-vqfxTCtxpjbTSA-->
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="26dp"
-        android:layout_marginTop="26dp"
-        android:text="Button" />
-
 </RelativeLayout>
