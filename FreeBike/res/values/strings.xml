@@ -4,7 +4,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">FreeBike</string>
-    <string name="rotate_start">開啟導航</string>
-    <string name="rotate_stop">關閉導航</string>
+    <string name="rotate_start">導航模式</string>
+    <string name="rotate_stop">地圖模式</string>
 
 </resources>

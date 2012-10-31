@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -46,10 +47,14 @@ public class MainActivity extends MapActivity implements LocationListener
 	private MapOverlay mapOverlay;
 	Drawable pin; //地圖上的釘點圖
 	
+	Menu menuItem;
 	protected static final int Bike_Timer = Menu.FIRST;//Menu
 	protected static final int Show_BikeStation = Menu.FIRST+1;
+	boolean isTimerStart = false;
+	CountDownTimer countDownTimer;
 	
 	Button btnRotate;
+	TextView txtTmer;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -57,6 +62,25 @@ public class MainActivity extends MapActivity implements LocationListener
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);
         findViews();
+        
+        countDownTimer = new CountDownTimer(25*60*1000, 1000)//計時25分鐘震動提醒
+    	{
+    		Vibrator myVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);//取得震動服務
+    		public void onTick(long millisUntilFinished) 
+    		{
+    			menuItem.getItem(0).setTitle("重新計時");
+    			txtTmer = (TextView)findViewById(R.id.txtTimer);
+    			txtTmer.setText(""+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
+    			//Log.v("timer","remaining:"+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
+    		}
+    		public void onFinish() 
+    		{
+    			myVibrator.vibrate(3000);
+    			Toast.makeText(MainActivity.this, "remaining 5 min", Toast.LENGTH_LONG).show();
+    			//mTextField.setText("done!");
+    			menuItem.getItem(0).setTitle("開始計時");
+    		}
+    	};
     }     	
     
     private void initMap()
@@ -110,7 +134,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		controller.setZoom(17);//全球1 ~ 街景21
 		
 		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);
+		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
     }
 
@@ -180,7 +204,7 @@ public class MainActivity extends MapActivity implements LocationListener
 	
 	private void updateStat()
 	{
-		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
+		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
 		
 		try
@@ -204,7 +228,7 @@ public class MainActivity extends MapActivity implements LocationListener
    		
    		if(isOkStatu)
    		{
-	   		locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
+	   		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
 			locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
 			
 			if( isRotateMap )// 啟動電子羅盤
@@ -242,8 +266,9 @@ public class MainActivity extends MapActivity implements LocationListener
 	@Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-		menu.add(0, Bike_Timer, 0, "開始計時");
-		menu.add(0, Show_BikeStation, 0, "附近租賃站");
+		menuItem = menu;
+		menuItem.add(0, Bike_Timer, 0, "開始計時");
+		menuItem.add(0, Show_BikeStation, 0, "附近租賃站");
         return super.onCreateOptionsMenu(menu);
     }
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -252,25 +277,20 @@ public class MainActivity extends MapActivity implements LocationListener
 		
 		switch(item.getItemId())
 		{
-			case Bike_Timer:
-				new CountDownTimer(25*60*1000, 1000)//計時25分鐘
-				{
-					Vibrator myVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);//取得震動服務
-					public void onTick(long millisUntilFinished) 
-					{
-						//mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
-						Log.v("timer","remaining:"+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
-					}
-					public void onFinish() 
-					{
-						myVibrator.vibrate(3000);
-						Toast.makeText(MainActivity.this, "remaining 5 min", Toast.LENGTH_LONG).show();
-						//mTextField.setText("done!");
-					}
-				}.start();
+			case Bike_Timer:				
+				countDownTimer.cancel();
+				countDownTimer.start();
+				break;
 			case Show_BikeStation:
 					controller.setZoom(17); //全球1 ~ 街景21
-					controller.animateTo(myLayer.getMyLocation());//將地點置中
+					try
+					{
+						controller.animateTo(myLayer.getMyLocation());//將地點置中
+					}
+					catch (Exception e) 
+					{
+						Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
+					}
 				break;
 		}
 		return super.onOptionsItemSelected(item);
