@@ -195,7 +195,7 @@ public class MainActivity extends MapActivity implements LocationListener
 	{
 		List<Overlay> overlays = mapView.getOverlays();//定位點
 		
-		pin = getResources().getDrawable(R.drawable.pin);//地圖上的釘點圖
+		pin = getResources().getDrawable(R.drawable.bike_pin);//地圖上的釘點圖
 		pin.setBounds(-pin.getMinimumWidth()/2, -pin.getMinimumHeight(), 0, 0);//以圖片中下為基準
 		mapOverlay = new MapOverlay(pin,this);
 
