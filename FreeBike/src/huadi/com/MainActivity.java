@@ -152,6 +152,7 @@ public class MainActivity extends MapActivity implements LocationListener
 				{
 		   			public void run() //產生一個執行緒執行
 		   			{
+		   				myLayer.enableCompass();//顯示羅盤
 		   			    controller.animateTo(myLayer.getMyLocation());//將地點置中
 		   			}
 		   		});
