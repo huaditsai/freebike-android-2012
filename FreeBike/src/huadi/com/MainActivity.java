@@ -286,6 +286,10 @@ public class MainActivity extends MapActivity implements LocationListener
 					controller.setZoom(17); //全球1 ~ 街景21
 					try
 					{
+						GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());//最近的站點
+						new GoogleDirection(myLayer, mapView).execute(
+								myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
+								minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);//規劃路線
 						controller.animateTo(myLayer.getMyLocation());//將地點置中
 					}
 					catch (Exception e) 

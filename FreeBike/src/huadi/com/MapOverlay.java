@@ -120,6 +120,8 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 		
 		items.add(new OverlayItem(San_Zhang_Li , null, "三張犁"));
 		
+		//Gener();
+		
 		populate();//準備ItemizedOverly建構後，所需的處理動作
 	}
 
@@ -179,4 +181,111 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 		}
 		return items.get(minI).getPoint();
 	}
+	
+	public static GeoPoint CloserStation(GeoPoint start, GeoPoint end, List<OverlayItem> station)//找起點到車站+車站到終點 最近的點
+	{
+		Location start_Location = new Location("point A");
+		Location end_Location = new Location("point B");
+		Location station_Location = new Location("point C");
+		
+		start_Location.setLatitude(start.getLatitudeE6() / 1E6);  
+		start_Location.setLongitude(start.getLongitudeE6() / 1E6);
+		
+		end_Location.setLatitude(end.getLatitudeE6() / 1E6);  
+		end_Location.setLongitude(end.getLongitudeE6() / 1E6);
+		
+		float distance[] = new float[station.size()];
+
+		for(int i = 0 ; i < station.size() ; i++)
+		{
+			station_Location.setLatitude(station.get(i).getPoint().getLatitudeE6() / 1E6);  
+			station_Location.setLongitude(station.get(i).getPoint().getLongitudeE6() / 1E6);
+			
+			distance[i] = start_Location.distanceTo(station_Location) + station_Location.distanceTo(end_Location); //起點到站+站到終點
+		}
+		
+		float min = distance[0];
+		int minI = 0;
+		
+		for(int i=0 ; i<distance.length ; i++)
+		{
+			if(distance[i] <= min)
+			{
+				min = distance[i];
+				minI = i;
+			}
+		}
+		return station.get(minI).getPoint();//起點到車站+車站到終點 最近的點
+	}
+	
+	public List<GeoPoint> Astar(GeoPoint start, GeoPoint end, List<OverlayItem> station, List<GeoPoint> route)
+	{
+		//先找到 車站終點 比 起點到終點 近的點
+		Location start_Location = new Location("point A");
+		Location end_Location = new Location("point B");
+		Location station_Location = new Location("point C");
+		
+		List<OverlayItem> closer_station = new ArrayList<OverlayItem>();//車站終點 比 起點到終點 近的點 們
+		
+		start_Location.setLatitude(start.getLatitudeE6() / 1E6);  
+		start_Location.setLongitude(start.getLongitudeE6() / 1E6);
+		
+		end_Location.setLatitude(end.getLatitudeE6() / 1E6);  
+		end_Location.setLongitude(end.getLongitudeE6() / 1E6);		
+		
+		for(int i = 0 ; i < station.size() ; i++)
+		{
+			station_Location.setLatitude(station.get(i).getPoint().getLatitudeE6() / 1E6);  
+			station_Location.setLongitude(station.get(i).getPoint().getLongitudeE6() / 1E6);
+			
+			if(station_Location.distanceTo(end_Location) < start_Location.distanceTo(end_Location))
+				closer_station.add(station.get(i)); //車站終點 比 起點到終點 近的點 們
+		}		
+		//找起點到車站+車站到終點 最近的點
+		GeoPoint nearest = CloserStation(start, end, closer_station);
+		
+		route.add(nearest);
+		
+		if(nearest != end)
+			route = Astar(nearest, end, closer_station, route);
+
+		return route;
+	}
+//	public void Gener()//找出所有腳踏車站間的距離
+//	{
+//		Location locationA = new Location("point A");
+//		Location locationB = new Location("point B");
+//		
+//		//float distance[] = new float[items.size()*items.size()];
+//		try
+//		{
+//			FileWriter fw = new FileWriter("/sdcard/output.txt", false);
+//	        BufferedWriter bw = new BufferedWriter(fw); //將BufferedWeiter與FileWrite物件做連結
+//	        
+//	        for(int k = 0 ; k < items.size() ; k++)
+//				bw.write("," + items.get(k).getSnippet());
+//	        bw.newLine();
+//	        
+//			for(int i = 0 ; i < items.size() ; i++)
+//			{
+//				locationA.setLatitude(items.get(i).getPoint().getLatitudeE6() / 1E6);  
+//				locationA.setLongitude(items.get(i).getPoint().getLongitudeE6() / 1E6);
+//				bw.write(items.get(i).getSnippet() + "," );
+//				for(int j = 0 ; j < items.size() ; j++)
+//				{
+//					locationB.setLatitude(items.get(j).getPoint().getLatitudeE6() / 1E6);  
+//					locationB.setLongitude(items.get(j).getPoint().getLongitudeE6() / 1E6);
+//					
+//			        bw.write(locationA.distanceTo(locationB)+",");
+//			        
+//				}
+//				bw.newLine();
+//			}
+//			bw.close(); 
+//		}
+//		catch(IOException e)
+//	    {
+//	       e.printStackTrace();
+//	    }
+//	}
 }
