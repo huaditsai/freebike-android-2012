@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -182,7 +183,7 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 		return items.get(minI).getPoint();
 	}
 	
-	public static GeoPoint CloserStation(GeoPoint start, GeoPoint end, List<OverlayItem> station)//找起點到車站+車站到終點 最近的點
+	public GeoPoint CloserStation(GeoPoint start, GeoPoint end, List<OverlayItem> station)//找起點到車站+車站到終點 最近的點
 	{
 		Location start_Location = new Location("point A");
 		Location end_Location = new Location("point B");
@@ -218,7 +219,7 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 		return station.get(minI).getPoint();//起點到車站+車站到終點 最近的點
 	}
 	
-	public List<GeoPoint> Astar(GeoPoint start, GeoPoint end, List<OverlayItem> station, List<GeoPoint> route)
+	public List<GeoPoint> WayStation(GeoPoint start, GeoPoint end, List<OverlayItem> station, List<GeoPoint> route)//找出路上的車站
 	{
 		//先找到 車站終點 比 起點到終點 近的點
 		Location start_Location = new Location("point A");
@@ -242,14 +243,20 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 				closer_station.add(station.get(i)); //車站終點 比 起點到終點 近的點 們
 		}		
 		//找起點到車站+車站到終點 最近的點
-		GeoPoint nearest = CloserStation(start, end, closer_station);
+		if(closer_station.size() > 1)
+		{
+			GeoPoint nearest = CloserStation(start, end, closer_station);		
+			route.add(nearest);
 		
-		route.add(nearest);
-		
-		if(nearest != end)
-			route = Astar(nearest, end, closer_station, route);
-
-		return route;
+			return WayStation(nearest, end, closer_station, route);
+		}
+		else
+			return route;
+	}
+	
+	public List<OverlayItem> GetItems()
+	{
+		return items;
 	}
 //	public void Gener()//找出所有腳踏車站間的距離
 //	{

@@ -1,5 +1,6 @@
 package huadi.com;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -203,21 +204,41 @@ public class MainActivity extends MapActivity implements LocationListener
 		overlays.add(mapOverlay);
 	}
 	
+	
 	private void updateStat()
 	{
 		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//模擬器會出錯
 		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//讓系統定時檢查位置
 		
 		try
-		{
-			GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());
+		{			
+			GeoPoint minPoint = new GeoPoint( (int)(25.023389 * 1000000), (int)(121.545208 * 1000000) );//MapOverlay.minDistience(myLayer.getMyLocation());
+			
+			List<GeoPoint> route = new ArrayList<GeoPoint>();
+			try
+			{
+				route = mapOverlay.WayStation(myLayer.getMyLocation(), minPoint, mapOverlay.GetItems(), route);
+				Log.v("0",""+route.size());
+				
+				// "7C" 是 "|" 的16進位，因url特殊字元問題，加字的話是加 "%"
 				new GoogleDirection(myLayer, mapView).execute(
 						myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
-						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);
+						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6 +
+						"&waypoints=" + route.get(0).getLatitudeE6()/ 1E6 + "," + route.get(0).getLongitudeE6()/ 1E6+
+						"%7C" + route.get(1).getLatitudeE6()/ 1E6 + "," + route.get(1).getLongitudeE6()/ 1E6);
+			}
+			catch (Exception e)
+			{
+				new GoogleDirection(myLayer, mapView).execute(
+						myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
+						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6 );
+				Log.v("1",""+e);
+			}
+			
 		}
 		catch (Exception e)
 		{
-			Log.v("1",""+e);
+			Log.v("2",""+e);
 		}
 	}
 	
