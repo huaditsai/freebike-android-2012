@@ -30,8 +30,8 @@ public class TouchScreen extends Overlay
 	public boolean onTouchEvent(MotionEvent event, MapView mapView) 
     {   
 		destination = null;
-        if (event.getAction() == 1) 
-        {                
+        if (event.getAction() == 1 && event.getEventTime()-event.getDownTime() >= 3000)
+        {
             final GeoPoint p = mapView.getProjection().fromPixels(
                 (int) event.getX(),
                 (int) event.getY());

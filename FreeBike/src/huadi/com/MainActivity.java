@@ -125,7 +125,7 @@ public class MainActivity extends MapActivity implements LocationListener
     	sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
     	
         rotateView = new RotateView(this);
-        mapView = new MapView(this, "0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"); // API KEY
+        mapView = new MapView(this, "0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"); // API KEY Export: 0XKrp4dJ2ko7aETu9iR_FRc3-vqfxTCtxpjbTSA
         rotateView.addView(mapView);
         
         requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
