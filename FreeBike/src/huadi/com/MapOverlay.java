@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -148,7 +147,7 @@ public class MapOverlay extends ItemizedOverlay<OverlayItem>
 	protected boolean onTap(int index) //使用者點選到圖標時觸發
 	{
 		Toast.makeText(mcontext, "這裡是 " + items.get(index).getSnippet(), Toast.LENGTH_SHORT).show();
-		return true;		
+		return true;
 	}
 	
 	public static GeoPoint minDistience(GeoPoint userPoint)//計算離自己最近的租賃站

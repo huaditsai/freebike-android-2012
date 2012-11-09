@@ -2,7 +2,6 @@ package huadi.com;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -25,6 +24,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -51,11 +51,14 @@ public class MainActivity extends MapActivity implements LocationListener
 	Menu menuItem;
 	protected static final int Bike_Timer = Menu.FIRST;//Menu
 	protected static final int Show_BikeStation = Menu.FIRST+1;
+	protected static final int Begion_Route = Menu.FIRST+2;
 	boolean isTimerStart = false;
 	CountDownTimer countDownTimer;
 	
 	Button btnRotate;
 	TextView txtTmer;
+	
+	TouchScreen touchScreen;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) 
@@ -76,6 +79,7 @@ public class MainActivity extends MapActivity implements LocationListener
     		}
     		public void onFinish() 
     		{
+    			txtTmer.setText("00:00");
     			myVibrator.vibrate(3000);
     			Toast.makeText(MainActivity.this, "remaining 5 min", Toast.LENGTH_LONG).show();
     			//mTextField.setText("done!");
@@ -90,7 +94,8 @@ public class MainActivity extends MapActivity implements LocationListener
 		{
 			new AlertDialog.Builder(MainActivity.this).setTitle("地圖工具")
 			.setMessage("您尚未開啟定位服務，要前往設定頁面啟動定位服務嗎?")
-			.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener()
+			.setCancelable(false)
+			.setPositiveButton("OK", new DialogInterface.OnClickListener()
 					{
 						public void onClick(DialogInterface dialog, int which)
 						{
@@ -132,7 +137,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		
 		mapView.setTraffic(false);//一般 mapView.setSatellite(true)//衛星 mapView.setStreetView(true)//街景
 		mapView.setBuiltInZoomControls(true);//縮放的按鈕
-		controller.setZoom(17);//全球1 ~ 街景21
+		controller.setZoom(16);//全球1 ~ 街景21
 		
 		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);
@@ -141,6 +146,7 @@ public class MainActivity extends MapActivity implements LocationListener
 
 	private void setupMap()
 	{
+		touchScreen = new TouchScreen(MainActivity.this);
 		//GeoPoint ntue = new GeoPoint( (int)(25.023389 * 1000000), (int)(121.545208 * 1000000) );
 		//controller.animateTo(ntue);
 		
@@ -158,6 +164,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		   			}
 		   		});
 		overlays.add(myLayer); //將locationLayer加入(add)overlays，才能顯示地圖
+		overlays.add(touchScreen);
 		
 		mapView.setClickable(true);
         mapView.setEnabled(true);
@@ -195,15 +202,16 @@ public class MainActivity extends MapActivity implements LocationListener
 	}
 	private void drawPin()
 	{
+		//touchScreen = new TouchScreen(MainActivity.this);
 		List<Overlay> overlays = mapView.getOverlays();//定位點
 		
 		pin = getResources().getDrawable(R.drawable.bike_pin);//地圖上的釘點圖
 		pin.setBounds(-pin.getMinimumWidth()/2, -pin.getMinimumHeight(), 0, 0);//以圖片中下為基準
 		mapOverlay = new MapOverlay(pin,this);
 
+		overlays.add(touchScreen);
 		overlays.add(mapOverlay);
-	}
-	
+	}	
 	
 	private void updateStat()
 	{
@@ -212,7 +220,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		
 		try
 		{			
-			GeoPoint minPoint = new GeoPoint( (int)(25.023389 * 1000000), (int)(121.545208 * 1000000) );//MapOverlay.minDistience(myLayer.getMyLocation());
+			GeoPoint minPoint = touchScreen.GetDestination(); //new GeoPoint( (int)(25.013389 * 1000000), (int)(121.555208 * 1000000) );
 			
 			List<GeoPoint> route = new ArrayList<GeoPoint>();
 			try
@@ -291,6 +299,7 @@ public class MainActivity extends MapActivity implements LocationListener
 		menuItem = menu;
 		menuItem.add(0, Bike_Timer, 0, "開始計時");
 		menuItem.add(0, Show_BikeStation, 0, "附近租賃站");
+		menuItem.add(0, Begion_Route, 0, "開始規劃");
         return super.onCreateOptionsMenu(menu);
     }
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -317,6 +326,12 @@ public class MainActivity extends MapActivity implements LocationListener
 					{
 						Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
 					}
+				break;
+			case Begion_Route:
+				List<Overlay> overlays = mapView.getOverlays();
+				overlays.clear();
+				drawPin();
+				updateStat();
 				break;
 		}
 		return super.onOptionsItemSelected(item);
