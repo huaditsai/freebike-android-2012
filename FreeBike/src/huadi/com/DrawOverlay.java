@@ -21,8 +21,6 @@ public class DrawOverlay extends Overlay
 	private final Path path;
 	private final Point p;
 	private final Paint paint;
-	
-	SmoothCanvas smoothCanvas = new SmoothCanvas();
 
 	public DrawOverlay(List<GeoPoint> geoPoints)
 	{

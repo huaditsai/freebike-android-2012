@@ -2,6 +2,8 @@ package huadi.com;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import android.R.integer;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -67,7 +69,7 @@ public class MainActivity extends MapActivity implements LocationListener
         //setContentView(R.layout.main);
         findViews();
         
-        countDownTimer = new CountDownTimer(25*60*1000, 1000)//計時25分鐘震動提醒
+        countDownTimer = new CountDownTimer(30*60*1000, 1000)//計時25分鐘震動提醒
     	{
     		Vibrator myVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);//取得震動服務
     		public void onTick(long millisUntilFinished) 
@@ -75,13 +77,18 @@ public class MainActivity extends MapActivity implements LocationListener
     			menuItem.getItem(0).setTitle("重新計時");
     			txtTmer = (TextView)findViewById(R.id.txtTimer);
     			txtTmer.setText(""+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
+    			if(millisUntilFinished / 1000 / 60 == 5)
+    			{
+    				myVibrator.vibrate(3000);
+    				Toast.makeText(MainActivity.this, "remaining 5 min", Toast.LENGTH_LONG).show();
+    			}    				
     			//Log.v("timer","remaining:"+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
     		}
     		public void onFinish() 
     		{
     			txtTmer.setText("00:00");
     			myVibrator.vibrate(3000);
-    			Toast.makeText(MainActivity.this, "remaining 5 min", Toast.LENGTH_LONG).show();
+    			Toast.makeText(MainActivity.this, "Time's up", Toast.LENGTH_LONG).show();
     			//mTextField.setText("done!");
     			menuItem.getItem(0).setTitle("開始計時");
     		}
@@ -125,14 +132,14 @@ public class MainActivity extends MapActivity implements LocationListener
     	sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
     	
         rotateView = new RotateView(this);
+        //mapView = (MapView) findViewById(R.id.mapView);
         mapView = new MapView(this, "0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"); // API KEY Export: 0XKrp4dJ2ko7aETu9iR_FRc3-vqfxTCtxpjbTSA
         rotateView.addView(mapView);
         
         requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(rotateView); 
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title);
-        
-    	//mapView = (MapView) findViewById(R.id.mapView);
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title);   
+    	
 		controller = mapView.getController(); //設定controller物件至map
 		
 		mapView.setTraffic(false);//一般 mapView.setSatellite(true)//衛星 mapView.setStreetView(true)//街景
@@ -220,29 +227,38 @@ public class MainActivity extends MapActivity implements LocationListener
 		
 		try
 		{			
-			GeoPoint minPoint = touchScreen.GetDestination(); //new GeoPoint( (int)(25.013389 * 1000000), (int)(121.555208 * 1000000) );
+			GeoPoint dest = touchScreen.GetDestination(); //new GeoPoint( (int)(25.013389 * 1000000), (int)(121.555208 * 1000000) );
+			Log.v("7",dest.toString());
 			
-			List<GeoPoint> route = new ArrayList<GeoPoint>();
-			try
+			if(dest != null)
 			{
-				route = mapOverlay.WayStation(myLayer.getMyLocation(), minPoint, mapOverlay.GetItems(), route);
+				List<GeoPoint> route = new ArrayList<GeoPoint>();
+
+				String ways = "";
+				route = mapOverlay.WayStation(myLayer.getMyLocation(), dest, mapOverlay.GetItems(), route);
 				Log.v("0",""+route.size());
-				
-				// "7C" 是 "|" 的16進位，因url特殊字元問題，加字的話是加 "%"
-				new GoogleDirection(myLayer, mapView).execute(
-						myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
-						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6 +
-						"&waypoints=" + route.get(0).getLatitudeE6()/ 1E6 + "," + route.get(0).getLongitudeE6()/ 1E6+
-						"%7C" + route.get(1).getLatitudeE6()/ 1E6 + "," + route.get(1).getLongitudeE6()/ 1E6);
+				if(route.size() > 0)
+				{
+					if(route.size() > 1)
+						for(int i = 1 ; i < route.size(); i++)
+							ways += "%7C" + route.get(i).getLatitudeE6()/ 1E6 + "," + route.get(i).getLongitudeE6()/ 1E6;
+					
+					Log.v("1",ways);
+					
+					// "7C" 是 "|" 的16進位，因url特殊字元問題，加字的話是加 "%"
+					new GoogleDirection(myLayer, mapView).execute(
+							myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
+							dest.getLatitudeE6()/ 1E6 + "," + dest.getLongitudeE6()/ 1E6 +
+							"&waypoints=" + route.get(0).getLatitudeE6()/ 1E6 + "," + route.get(0).getLongitudeE6()/ 1E6+
+							ways);
+				}
+				else 
+				{
+					new GoogleDirection(myLayer, mapView).execute(
+							myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
+							dest.getLatitudeE6()/ 1E6 + "," + dest.getLongitudeE6()/ 1E6 );
+				}
 			}
-			catch (Exception e)
-			{
-				new GoogleDirection(myLayer, mapView).execute(
-						myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
-						minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6 );
-				Log.v("1",""+e);
-			}
-			
 		}
 		catch (Exception e)
 		{
