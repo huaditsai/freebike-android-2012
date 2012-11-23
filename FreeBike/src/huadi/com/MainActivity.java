@@ -1,29 +1,42 @@
 package huadi.com;
 
+
+import huadi.com.R;
+import huadi.com.Route.BikeOverlay;
+import huadi.com.Route.GoogleDirection;
+import huadi.com.map.MyLocationMgr;
+import huadi.com.map.MyLocationMgr.LocationCallBack;
+import huadi.com.map.LongPressOverlay;
+import huadi.com.map.MyItemizedOverlay;
+import huadi.com.map.SearchSuggestionProvider;
+import huadi.com.utils.CommonHelper;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-import android.R.integer;
-import android.app.AlertDialog;
+import android.annotation.SuppressLint;
+import android.app.SearchManager;
 import android.app.Service;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
-import android.provider.Settings;
+import android.provider.SearchRecentSuggestions;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,50 +44,371 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
-import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 
-public class MainActivity extends MapActivity implements LocationListener
+@SuppressLint("HandlerLeak")
+public class MainActivity  extends MapActivity implements LocationCallBack ,OnClickListener
 {
-	boolean isOkStatu = false;
+	private MapView mapView;
+	private MapController mapController;
+	private View popView;
+	private Drawable myLocationDrawable;
+	private Drawable mylongPressDrawable;
+	private MyLocationMgr myLocationMgr;
+	private MyItemizedOverlay myLocationItemized;//æˆ‘çš„ä½ç½®å±¤
+	private MyItemizedOverlay mLongPressItemized; //é•·æŒ‰æ™‚é–“å±¤
+	private List<Overlay> mapOverlays;
+	private OverlayItem overlayitem = null;
+	private String query;
+	public GeoPoint locPoint; //æœå°‹æˆ–æ˜¯é•·æŒ‰çš„ä½ç½®
+	public GeoPoint myPoint;
+	
+	private BikeOverlay bikeOverlay;
+	Drawable pin; //åœ°åœ–ä¸Šçš„é‡˜é»åœ–
+	
+	//æ—‹è½‰åœ°åœ–---------
+	private boolean isRotateMode = false;
 	private SensorManager sensorManager;
-    private RotateView rotateView;    
-    private boolean isRotateMap = false; 
-    
-	private MapView mapView;  //«Å§imapª«¥ó
-	private MapController controller;
+	private LinearLayout rotateViewLinearLayout;
+	private RotateView rotateView;
+	//--------------
 	
-	private LocationManager locationMgr;	
-	private MyLocationOverlay myLayer;
+	ImageButton loction_Btn; //æ—‹è½‰åœ°åœ–
+	ImageButton timer_Btn; //è¨ˆæ™‚
+	ImageButton nearbike_Btn; //æœ€è¿‘ç«™é»
+	ImageButton search_btn; //æœå°‹åœ°åœ–
 	
-	private MapOverlay mapOverlay;
-	Drawable pin; //¦a¹Ï¤Wªº°vÂI¹Ï
-	
-	Menu menuItem;
-	protected static final int Bike_Timer = Menu.FIRST;//Menu
-	protected static final int Show_BikeStation = Menu.FIRST+1;
-	protected static final int Begion_Route = Menu.FIRST+2;
-	boolean isTimerStart = false;
-	CountDownTimer countDownTimer;
-	
-	Button btnRotate;
 	TextView txtTmer;
+	CountDownTimer countDownTimer; //è¨ˆæ™‚å™¨
 	
-	TouchScreen touchScreen;
+	public final int MSG_VIEW_LONGPRESS = 10001;
+	public final int MSG_VIEW_ADDRESSNAME = 10002;
+	public final int MSG_VIEW_ADDRESSNAME_FAIL = 10004;
+	public final int MSG_VIEW_LOCATIONLATLNG = 10003;
+	public final int MSG_VIEW_LOCATIONLATLNG_FAIL = 10005;
+	
 	
     @Override
-    public void onCreate(Bundle savedInstanceState) 
+    public void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
-        //setContentView(R.layout.main);
-        findViews();
+        super.onCreate(savedInstanceState);        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.main);
         
-        countDownTimer = new CountDownTimer(30*60*1000, 1000)//­p®É25¤ÀÄÁ¾_°Ê´£¿ô
+        //æ—‹è½‰åœ°åœ–---------
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+		rotateViewLinearLayout = (LinearLayout) findViewById(R.id.rotating_view);
+		rotateView = new RotateView(this);
+		//-------------------
+        
+        loction_Btn = (ImageButton)findViewById(R.id.btn_loction);
+    	timer_Btn = (ImageButton)findViewById(R.id.btn_timer);
+    	nearbike_Btn = (ImageButton)findViewById(R.id.btn_nearbike);
+    	loction_Btn = (ImageButton)findViewById(R.id.btn_loction);
+    	search_btn = (ImageButton)findViewById(R.id.btn_search);
+    	
+    	loction_Btn.setOnClickListener(this);
+    	timer_Btn.setOnClickListener(this);
+    	nearbike_Btn.setOnClickListener(this);
+    	search_btn.setOnClickListener(this);
+    	
+        myLocationDrawable = getResources().getDrawable(R.drawable.arrow); //è‡ªå·±
+        mylongPressDrawable = getResources().getDrawable(R.drawable.dest); //é•·æŒ‰çš„ä½ç½®
+        
+        mapView = (MapView) findViewById(R.id.map_view);
+		mapView.setBuiltInZoomControls(true);
+		mapView.setClickable(true);
+		
+		initPopView();
+		mapController = mapView.getController();
+		myLocationItemized = new MyItemizedOverlay(myLocationDrawable,this, mapView, popView, mapController);
+		mLongPressItemized = new MyItemizedOverlay(mylongPressDrawable,this, mapView, popView, mapController);
+		mapOverlays = mapView.getOverlays();
+		mapOverlays.add(new LongPressOverlay(this, mapView, mHandler, mapController));
+		
+		BikeStationPin();
+		
+		//ä»¥å°åŒ—å¸‚æ”¿åºœç‚ºä¸­å¿ƒ
+		GeoPoint cityLocPoint = new GeoPoint(25037642,12156377);
+		mapController.animateTo(cityLocPoint);
+		mapController.setZoom(12);
+		MyLocationMgr.init(MainActivity.this.getApplicationContext() , MainActivity.this, myLocationItemized, mapView);
+		myLocationMgr = MyLocationMgr.getInstance();
+		
+		myTimer();
+    }
+    
+    
+    private void initPopView()
+    {
+    	if(null == popView)
     	{
-    		Vibrator myVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);//¨ú±o¾_°ÊªA°È
+			popView = getLayoutInflater().inflate(R.layout.overlay_popup, null);
+			mapView.addView(popView, new MapView.LayoutParams(
+					MapView.LayoutParams.WRAP_CONTENT,
+					MapView.LayoutParams.WRAP_CONTENT, null,
+					MapView.LayoutParams.BOTTOM_CENTER));
+			popView.setVisibility(View.GONE);
+    	}
+       
+    }
+    
+    public void BikeStationPin()
+    {
+    	pin = getResources().getDrawable(R.drawable.bike_pin);//åœ°åœ–ä¸Šçš„é‡˜é»åœ–
+		pin.setBounds(-pin.getMinimumWidth()/2, -pin.getMinimumHeight(), 0, 0);//ä»¥åœ–ç‰‡ä¸­ä¸‹ç‚ºåŸºæº–
+		bikeOverlay = new BikeOverlay(pin,this);
+		mapOverlays.add(bikeOverlay);
+    }    
+	
+	@Override
+	public void onCurrentLocation(Location location) 
+	{
+		myPoint = new GeoPoint((int) (location.getLatitude() * 1E6),(int) (location.getLongitude() * 1E6));
+		overlayitem = new OverlayItem(myPoint, "æˆ‘çš„ä½ç½®", "");
+		mapController.setZoom(16);
+		if(myLocationItemized.size() > 0)
+		{
+			myLocationItemized.removeOverlay(0);
+		}
+		myLocationItemized.addOverlay(overlayitem);
+		mapOverlays.add(myLocationItemized);
+		mapController.animateTo(myPoint);
+		
+		if(locPoint != null)
+			BikeDire(myPoint,locPoint);
+	}
+	
+	
+	private String getLocationAddress(GeoPoint point)// é€šéç¶“ç·¯åº¦å¾—åˆ°åœ°å€
+	{
+		String add = "";
+		Geocoder geoCoder = new Geocoder(getBaseContext(),Locale.getDefault());
+		try 
+		{
+			List<Address> addresses = geoCoder.getFromLocation(
+					point.getLatitudeE6() / 1E6, point.getLongitudeE6() / 1E6, 1);
+			Address address = addresses.get(0);
+			int maxLine = address.getMaxAddressLineIndex();
+			if(maxLine >= 2)
+			{
+				add =  address.getAddressLine(1) + address.getAddressLine(2);
+			}
+			else 
+			{
+				add = address.getAddressLine(1);
+			}
+		} 
+		catch (IOException e) 
+		{
+			add = "";
+			e.printStackTrace();
+		}
+		return add;
+	}	
+	
+	
+	private Address searchLocationByName(String addressName)
+	{
+		Geocoder geoCoder = new Geocoder(getBaseContext(),Locale.TAIWAN);
+		try 
+		{
+			List<Address> addresses = geoCoder.getFromLocationName(addressName, 1);
+			Address address_send = null;
+			for(Address address : addresses)
+			{
+				locPoint = new GeoPoint((int)(address.getLatitude() * 1E6), (int)(address.getLongitude() * 1E6));
+				address.getAddressLine(1);
+				address_send = address;
+			}
+			return address_send;
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
+	
+	private Handler mHandler = new Handler() 
+	{
+		@SuppressWarnings("unchecked")
+		@Override
+		public void handleMessage(Message msg) 
+		{
+			switch (msg.what) 
+			{
+				case MSG_VIEW_LONGPRESS: //ç•¶é•·æŒ‰æ™‚
+					if(null == locPoint) return;
+					new Thread( new Runnable() 
+					{
+						@Override
+						public void run() 
+						{
+							String addressName = "";
+							
+							int count = 0;
+							while(true)
+							{
+								try 
+								{
+									Thread.sleep(500);
+								} 
+								catch (InterruptedException e) 
+								{
+									e.printStackTrace();
+								}
+								count++;
+								addressName = getLocationAddress(locPoint);
+								if("".equals(addressName) && count > 5)//5æ¬¡æ²’å¾—åˆ°åœ°å€å°±ç®—äº†
+								{
+									Message msg1 = new Message();
+									msg1.what = MSG_VIEW_ADDRESSNAME_FAIL;
+									mHandler.sendMessage(msg1);
+									break;
+								}
+								else if("".equals(addressName) )
+									continue;
+								else
+									break;								
+							}
+							if(!"".equals(addressName) || count < 5){
+								Message msg = new Message();
+								msg.what = MSG_VIEW_ADDRESSNAME;
+								msg.obj = addressName;
+								mHandler.sendMessage(msg);
+							}
+						}
+					}
+					).start();
+					overlayitem = new OverlayItem(locPoint, "ä½ç½®åç¨±","è¼‰å…¥ä¸­...");
+					if(mLongPressItemized.size() > 0)
+						mLongPressItemized.removeOverlay(0);
+					
+					popView.setVisibility(View.GONE);
+					mLongPressItemized.addOverlay(overlayitem);
+					mLongPressItemized.setFocus(overlayitem);
+					mapOverlays.add(mLongPressItemized);
+					mapController.animateTo(locPoint);
+					mapView.invalidate();
+					break;
+					
+				case MSG_VIEW_ADDRESSNAME:	//å¾—åˆ°åœ°å€å¾Œé¡¯ç¤ºåœ¨å½ˆè·³æ¡†ä¸Š		
+					TextView desc = (TextView) popView.findViewById(R.id.map_bubbleText);
+					desc.setText((String)msg.obj);
+					popView.setVisibility(View.VISIBLE);
+					break;
+					
+				case MSG_VIEW_ADDRESSNAME_FAIL: //å¾—ä¸åˆ°åœ°å€åç¨±
+					TextView desc1 = (TextView) popView.findViewById(R.id.map_bubbleText);
+					desc1.setText("ç„¡æ³•å¾—ä½ç½®");
+					popView.setVisibility(View.VISIBLE);
+					break;
+					
+				case MSG_VIEW_LOCATIONLATLNG:
+					CommonHelper.closeProgress();
+					Address address = (Address)msg.obj;
+					locPoint = new GeoPoint((int)(address.getLatitude() * 1E6), (int)(address.getLongitude() * 1E6));
+					overlayitem = new OverlayItem(locPoint, address.getAddressLine(1),address.getAddressLine(0));
+					if(mLongPressItemized.size() > 0){
+						mLongPressItemized.removeOverlay(0);
+					}
+					
+					BikeDire(myPoint,locPoint);
+					
+					popView.setVisibility(View.GONE);
+					mLongPressItemized.addOverlay(overlayitem);
+					mLongPressItemized.setFocus(overlayitem);
+					mapOverlays.add(mLongPressItemized);
+					mapController.animateTo(locPoint);
+					mapView.invalidate();
+					break;
+					
+				case MSG_VIEW_LOCATIONLATLNG_FAIL:
+					CommonHelper.closeProgress();
+					Toast.makeText(MainActivity.this, "æœå°‹åœ°å€å¤±æ•—", Toast.LENGTH_SHORT).show();
+					break;
+			}
+		}
+	};
+	
+	
+	@Override
+	public void onClick(View v) //è™•ç†ä¸‰å€‹buttonçš„äº‹ä»¶
+	{
+		switch (v.getId()) 
+		{
+			case R.id.btn_search://æœå°‹
+				onSearchRequested();
+				break;
+				
+			case R.id.btn_loction://æ—‹è½‰åœ°åœ–
+				RotateMap(isRotateMode);
+				break;				
+			
+			case R.id.btn_nearbike://æœ€è¿‘ç«™é»
+				try
+				{
+					GeoPoint minPoint = BikeOverlay.minDistience(myPoint);//æœ€è¿‘çš„ç«™é»
+					new GoogleDirection(myLocationItemized, mapView).execute(
+							myPoint.getLatitudeE6()/1E6 + "," + myPoint.getLongitudeE6()/1E6,
+							minPoint.getLatitudeE6()/1E6 + "," + minPoint.getLongitudeE6()/1E6);
+				}
+				catch (Exception e)
+				{
+					Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
+				}
+				
+				break;
+				
+			case R.id.btn_timer: //è¨ˆæ™‚å™¨
+				countDownTimer.cancel();
+				countDownTimer.start();
+				break;
+			
+			default:
+				break;
+		}
+	}
+	
+	public void BikeDire(GeoPoint from, GeoPoint dest) //è·¯ç·šè¦åŠƒ
+	{
+		List<GeoPoint> route = new ArrayList<GeoPoint>();
+		String ways = "";
+		route = BikeOverlay.WayStation(from, dest, BikeOverlay.GetItems(), route);
+		
+		Log.v("0", "" + route.size());
+		
+		if(route.size() > 0)
+		{
+			if(route.size() > 1) // "7C" æ˜¯ "|" çš„16é€²ä½ï¼Œå› urlç‰¹æ®Šå­—å…ƒå•é¡Œï¼ŒåŠ å­—çš„è©±æ˜¯åŠ  "%"
+				for(int i = 1 ; i < route.size(); i++)
+					ways += "%7C" + route.get(i).getLatitudeE6()/ 1E6 + "," + route.get(i).getLongitudeE6()/ 1E6;
+			
+			new GoogleDirection(myLocationItemized, mapView).execute(
+					from.getLatitudeE6()/1E6+","+from.getLongitudeE6()/1E6,
+					dest.getLatitudeE6()/1E6+","+dest.getLongitudeE6()/1E6+
+					"&waypoints=" + route.get(0).getLatitudeE6()/ 1E6 + "," + route.get(0).getLongitudeE6()/ 1E6+
+					ways);
+		}
+		else 
+		{
+			new GoogleDirection(myLocationItemized, mapView).execute(
+					from.getLatitudeE6()/1E6+","+from.getLongitudeE6()/1E6,
+					dest.getLatitudeE6()/1E6+","+dest.getLongitudeE6()/1E6);
+		}
+	}
+	
+	private void myTimer()
+	{
+		countDownTimer = new CountDownTimer(30*60*1000, 1000)//è¨ˆæ™‚30åˆ†é˜éœ‡å‹•æé†’
+    	{
+    		Vibrator myVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);//å–å¾—éœ‡å‹•æœå‹™
     		public void onTick(long millisUntilFinished) 
     		{
-    			menuItem.getItem(0).setTitle("­«·s­p®É");
     			txtTmer = (TextView)findViewById(R.id.txtTimer);
     			txtTmer.setText(""+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
     			if(millisUntilFinished / 1000 / 60 == 5)
@@ -82,298 +416,145 @@ public class MainActivity extends MapActivity implements LocationListener
     				myVibrator.vibrate(3000);
     				Toast.makeText(MainActivity.this, "remaining 5 min", Toast.LENGTH_LONG).show();
     			}    				
-    			//Log.v("timer","remaining:"+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
     		}
     		public void onFinish() 
     		{
     			txtTmer.setText("00:00");
     			myVibrator.vibrate(3000);
     			Toast.makeText(MainActivity.this, "Time's up", Toast.LENGTH_LONG).show();
-    			//mTextField.setText("done!");
-    			menuItem.getItem(0).setTitle("¶}©l­p®É");
     		}
     	};
-    }     	
-    
-    private void initMap()
-    {
-    	if (!locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER))
+	}
+	
+	private void RotateMap(boolean compassMode)//æ—‹è½‰åœ°åœ–
+	{
+		if (compassMode)
 		{
-			new AlertDialog.Builder(MainActivity.this).setTitle("¦a¹Ï¤u¨ã")
-			.setMessage("±z©|¥¼¶}±Ò©w¦ìªA°È¡A­n«e©¹³]©w­¶­±±Ò°Ê©w¦ìªA°È¶Ü?")
-			.setCancelable(false)
-			.setPositiveButton("OK", new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog, int which)
-						{
-							startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));//¶}±Ò¤@­ÓActivity¡A±N¨Ï¥ÎªÌ±a¨ì©w¦ì³]©w­¶­±
-						}
-					})
-			.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-					{
-						public void onClick(DialogInterface dialog, int which)
-						{
-							Toast.makeText(MainActivity.this, "¥¼¶}±Ò©w¦ìªA°È¡AµLªk¨Ï¥Î¥»¤u¨ã!!", Toast.LENGTH_SHORT).show();
-						}
-					})
-			.show();
+			sensorManager.unregisterListener(rotateView);
+			rotateView.removeAllViews();
+			rotateViewLinearLayout.removeAllViews();
+			rotateViewLinearLayout.addView(mapView);
+			mapView.setClickable(true);
+			//myLocationOverlay.disableCompass();
+			isRotateMode = false;
 		}
 		else
 		{
-			isOkStatu = true;
-			setupMap();
-			drawPin();
-			updateStat();
+			rotateViewLinearLayout.removeAllViews();
+			rotateView.removeAllViews();
+			rotateView.addView(mapView);
+			rotateViewLinearLayout.addView(rotateView);
+			mapView.setClickable(false);
+			sensorManager.registerListener(rotateView,
+					SensorManager.SENSOR_ORIENTATION,
+					SensorManager.SENSOR_DELAY_UI);
+			//myLocationOverlay.enableCompass();
+			isRotateMode = true;
 		}
-    }
+	}
+	
+	@Override
+	public boolean onSearchRequested(){
+		//æ‰“é–‹æµ®å‹•æœç´¢æ¡†ï¼ˆç¬¬ä¸€å€‹åƒæ•¸é»˜èªæ·»åŠ åˆ°æœç´¢æ¡†çš„å€¼ï¼‰      
+		startSearch(null, false, null, false);
+		return true;
+	}
+	
+	
 
-	private void findViews() 
-    {
-    	sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-    	
-        rotateView = new RotateView(this);
-        //mapView = (MapView) findViewById(R.id.mapView);
-        mapView = new MapView(this, "0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"); // API KEY Export: 0XKrp4dJ2ko7aETu9iR_FRc3-vqfxTCtxpjbTSA
-        rotateView.addView(mapView);
-        
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-        setContentView(rotateView); 
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title);   
-    	
-		controller = mapView.getController(); //³]©wcontrollerª«¥ó¦Ümap
-		
-		mapView.setTraffic(false);//¤@¯ë mapView.setSatellite(true)//½Ã¬P mapView.setStreetView(true)//µó´º
-		mapView.setBuiltInZoomControls(true);//ÁY©ñªº«ö¶s
-		controller.setZoom(16);//¥ş²y1 ~ µó´º21
-		
-		locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);
-		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);
-    }
-
-	private void setupMap()
+	//å¾—åˆ°æœå°‹çµæœ
+	@Override
+	public void onNewIntent(Intent intent)
 	{
-		touchScreen = new TouchScreen(MainActivity.this);
-		//GeoPoint ntue = new GeoPoint( (int)(25.023389 * 1000000), (int)(121.545208 * 1000000) );
-		//controller.animateTo(ntue);
+		super.onNewIntent(intent);
 		
-		List<Overlay> overlays = mapView.getOverlays();//©w¦ìÂI
-		myLayer = new MyLocationOverlay(this, mapView);
-		myLayer.enableCompass();//Åã¥ÜÃ¹½L
-		myLayer.enableMyLocation();//±Ò°Ê§ó·s
-		myLayer.runOnFirstFix(
-				new Runnable()//¦ì¸m¸ê°T§ó·s®É
-				{
-		   			public void run() //²£¥Í¤@­Ó°õ¦æºü°õ¦æ
-		   			{
-		   				myLayer.enableCompass();//Åã¥ÜÃ¹½L
-		   			    controller.animateTo(myLayer.getMyLocation());//±N¦aÂI¸m¤¤
-		   			}
-		   		});
-		overlays.add(myLayer); //±NlocationLayer¥[¤J(add)overlays¡A¤~¯àÅã¥Ü¦a¹Ï
-		overlays.add(touchScreen);
+		query = intent.getStringExtra(SearchManager.QUERY);//ç²å¾—æœå°‹æ¡†è£¡çš„å€¼
+		//ä¿å­˜æœå°‹è¨˜éŒ„
+		SearchRecentSuggestions suggestions=new SearchRecentSuggestions(this,
+				SearchSuggestionProvider.AUTHORITY, SearchSuggestionProvider.MODE);
+		suggestions.saveRecentQuery(query, null);
 		
-		mapView.setClickable(true);
-        mapView.setEnabled(true);
-        
-        
-        btnRotate = (Button) findViewById(R.id.btnRotate);        
-        btnRotate.setOnClickListener(new Button.OnClickListener() 
-        {
-            @SuppressWarnings("deprecation")
+		CommonHelper.showProgress(this, "æ­£åœ¨æœå°‹: " + query);
+		new Thread(new Runnable() 
+		{
 			@Override
-            public void onClick(View view) 
-            {
-            	if( isRotateMap ) // ­nÃö³¬¹q¤lÃ¹½L
-				{						
-					sensorManager.unregisterListener(rotateView);					
-            		
-					float[] values = new float[1]; values[0] = 0;//¨Ï¦a¹Ï¥_¦V¤W
-					rotateView.onSensorChanged(0, values);//¨Ï¦a¹Ï¥_¦V¤W
-
-					isRotateMap = false;
-					mapView.setClickable(true);
-					btnRotate.setText(R.string.rotate_start);
-				} 
-				else // ­n±Ò°Ê¹q¤lÃ¹½L
-				{
-					mapView.setStreetView(true);
-					sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
-					isRotateMap = true;
-					mapView.setClickable(false);
-					btnRotate.setText(R.string.rotate_stop);
-				}
-            }
-        });
-        
-	}
-	private void drawPin()
-	{
-		//touchScreen = new TouchScreen(MainActivity.this);
-		List<Overlay> overlays = mapView.getOverlays();//©w¦ìÂI
-		
-		pin = getResources().getDrawable(R.drawable.bike_pin);//¦a¹Ï¤Wªº°vÂI¹Ï
-		pin.setBounds(-pin.getMinimumWidth()/2, -pin.getMinimumHeight(), 0, 0);//¥H¹Ï¤ù¤¤¤U¬°°ò·Ç
-		mapOverlay = new MapOverlay(pin,this);
-
-		overlays.add(touchScreen);
-		overlays.add(mapOverlay);
-	}	
-	
-	private void updateStat()
-	{
-		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//¼ÒÀÀ¾¹·|¥X¿ù
-		locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//Åı¨t²Î©w®ÉÀË¬d¦ì¸m
-		
-		try
-		{			
-			GeoPoint dest = touchScreen.GetDestination(); //new GeoPoint( (int)(25.013389 * 1000000), (int)(121.555208 * 1000000) );
-			Log.v("7",dest.toString());
-			
-			if(dest != null)
+			public void run() 
 			{
-				List<GeoPoint> route = new ArrayList<GeoPoint>();
-
-				String ways = "";
-				route = mapOverlay.WayStation(myLayer.getMyLocation(), dest, mapOverlay.GetItems(), route);
-				Log.v("0",""+route.size());
-				if(route.size() > 0)
+				Address address;
+				int count = 0;
+				while(true)
 				{
-					if(route.size() > 1)
-						for(int i = 1 ; i < route.size(); i++)
-							ways += "%7C" + route.get(i).getLatitudeE6()/ 1E6 + "," + route.get(i).getLongitudeE6()/ 1E6;
+					count++;
+					try 
+					{
+						Thread.sleep(500);
+					} 
+					catch (InterruptedException e) 
+					{
+						e.printStackTrace();
+					}
+					address = searchLocationByName(query);
 					
-					Log.v("1",ways);
-					
-					// "7C" ¬O "|" ªº16¶i¦ì¡A¦]url¯S®í¦r¤¸°İÃD¡A¥[¦rªº¸Ü¬O¥[ "%"
-					new GoogleDirection(myLayer, mapView).execute(
-							myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
-							dest.getLatitudeE6()/ 1E6 + "," + dest.getLongitudeE6()/ 1E6 +
-							"&waypoints=" + route.get(0).getLatitudeE6()/ 1E6 + "," + route.get(0).getLongitudeE6()/ 1E6+
-							ways);
+					if(address == null && count > 5) //æœå°‹ä¸åˆ°æˆ–è¶…é5æ¬¡ å°±èªªå¤±æ•—äº†
+					{
+						Message msg1 = new Message();
+						msg1.what = MSG_VIEW_LOCATIONLATLNG_FAIL;
+						mHandler.sendMessage(msg1);
+						break;
+					}
+					else if(address == null)
+						continue;
+					else
+						break;
 				}
-				else 
+				
+				if( address != null || count <= 5 )
 				{
-					new GoogleDirection(myLayer, mapView).execute(
-							myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
-							dest.getLatitudeE6()/ 1E6 + "," + dest.getLongitudeE6()/ 1E6 );
+					Message msg = new Message();
+					msg.what = MSG_VIEW_LOCATIONLATLNG;
+					msg.obj = address;
+					mHandler.sendMessage(msg);
 				}
 			}
-		}
-		catch (Exception e)
-		{
-			Log.v("2",""+e);
-		}
-	}
-	
-	@SuppressWarnings("deprecation")
-	@Override
-   	protected void onResume() 
-	{
-   		super.onResume();
-   		
-   		if(isOkStatu)
-   		{
-	   		//locationMgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, MainActivity.this);//¼ÒÀÀ¾¹·|¥X¿ù
-			locationMgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, MainActivity.this);//Åı¨t²Î©w®ÉÀË¬d¦ì¸m
-			
-			if( isRotateMap )// ±Ò°Ê¹q¤lÃ¹½L
-			{			
-				sensorManager.registerListener(rotateView,SensorManager.SENSOR_ORIENTATION, SensorManager.SENSOR_DELAY_UI);
-			}
-			
-	   		myLayer.enableMyLocation();//±Ò°Ê§ó·s
-   		}
-   		else 
-   		{
-			initMap();
-		}
-   	}   	
-
-	@SuppressWarnings("deprecation")
-	@Override
-   	protected void onPause() 
-   	{
-   		super.onPause();
-   		if(isOkStatu)
-   		{
-   			locationMgr.removeUpdates(MainActivity.this);
-   			myLayer.disableMyLocation();//Ãö³¬§ó·s
-   			sensorManager.unregisterListener(rotateView);
-   		}
-   	}
-
-	@Override
-	protected boolean isRouteDisplayed()//§iª¾¥ô¦ó²¾°Ê¸ê®Æ
-	{
-		return false;
+		}).start();
 	}
 	
 	@Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-		menuItem = menu;
-		menuItem.add(0, Bike_Timer, 0, "¶}©l­p®É");
-		menuItem.add(0, Show_BikeStation, 0, "ªşªñ¯²¸î¯¸");
-		menuItem.add(0, Begion_Route, 0, "¶}©l³W¹º");
-        return super.onCreateOptionsMenu(menu);
-    }
-	public boolean onOptionsItemSelected(MenuItem item)
+	public void onResume()
 	{
-		super.onOptionsItemSelected(item);
-		
-		switch(item.getItemId())
-		{
-			case Bike_Timer:				
-				countDownTimer.cancel();
-				countDownTimer.start();
-				break;
-			case Show_BikeStation:
-					controller.setZoom(17); //¥ş²y1 ~ µó´º21
-					try
-					{
-						GeoPoint minPoint = MapOverlay.minDistience(myLayer.getMyLocation());//³Ìªñªº¯¸ÂI
-						new GoogleDirection(myLayer, mapView).execute(
-								myLayer.getMyLocation().getLatitudeE6()/ 1E6 + "," + myLayer.getMyLocation().getLongitudeE6()/ 1E6, 
-								minPoint.getLatitudeE6()/ 1E6 + "," + minPoint.getLongitudeE6()/ 1E6);//³W¹º¸ô½u
-						controller.animateTo(myLayer.getMyLocation());//±N¦aÂI¸m¤¤
-					}
-					catch (Exception e) 
-					{
-						Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
-					}
-				break;
-			case Begion_Route:
-				List<Overlay> overlays = mapView.getOverlays();
-				overlays.clear();
-				drawPin();
-				updateStat();
-				break;
-		}
-		return super.onOptionsItemSelected(item);
+		super.onResume();
 	}
-	@Override //·í¦aÂI§ïÅÜ
-	public void onLocationChanged(Location location)
+
+	@Override
+	public void onPause()
 	{
-		List<Overlay> overlays = mapView.getOverlays();
-		overlays.clear();
-		drawPin();
-		updateStat();
-		//Toast.makeText(this, location.toString(), Toast.LENGTH_LONG).show();
+		super.onPause();
 	}
-	@Override //·íGPS©Îºô¸ôÃö³¬
-	public void onProviderDisabled(String provider)
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
 	{
+		// Save instance-specific state
+		super.onSaveInstanceState(outState);
+		// remember the compass mode state
+	}
+	
+	@Override
+	protected void onStop()
+	{
+		sensorManager.unregisterListener(rotateView);
+		super.onStop();
+	}
+	
+	@Override
+	protected void onDestroy() {
 		// TODO Auto-generated method stub
+		super.onDestroy();
+		myLocationMgr.destoryLocationManager();
 	}
-	@Override //·íGPS©Îºô¸ô¶}±Ò
-	public void onProviderEnabled(String provider)
-	{
-		// TODO Auto-generated method stub		
-	}
-	@Override //·íGPS©Îºô¸ôª¬ºA§ïÅÜ
-	public void onStatusChanged(String provider, int status, Bundle extras)
-	{
-		// TODO Auto-generated method stub		
+	
+	@Override //ç¹¼æ‰¿ MapActivity å¿…éœ€å¯¦ä½œ isRouteDisplayed æ–¹æ³•
+	protected boolean isRouteDisplayed() {
+		return false;
 	}
 }

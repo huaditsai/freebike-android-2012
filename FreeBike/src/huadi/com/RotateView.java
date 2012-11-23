@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 @SuppressWarnings("deprecation")
 public class RotateView extends ViewGroup implements SensorListener
 {
-	private static final float SQ2 = 1.414213562373095f; // ®Ú¸¹2 (sqrt)
+	private static final float SQ2 = 1.414213562373095f; // æ ¹è™Ÿ2 (sqrt)
     private final SmoothCanvas mCanvas = new SmoothCanvas();
     private float mHeading = 0;
 
@@ -31,25 +31,25 @@ public class RotateView extends ViewGroup implements SensorListener
         super(context);
     }
     
-    public void onSensorChanged(int sensor, float[] values) // ·í Senser ¼Æ¾Ú§ó°Ê®É
+    public void onSensorChanged(int sensor, float[] values) // ç•¶ Senser æ•¸æ“šæ›´å‹•æ™‚
     {
         //Log.d(TAG, "x: " + values[0] + "y: " + values[1] + "z: " + values[2]);
         synchronized (this)
         {
-            mHeading = values[0]; // «ü©w¨¤«×¼Æ¾Úµ¹ mHeading ÅÜ¼Æ
-            invalidate(); // ²MªÅ¨¤«×¼Æ¾Ú¦³ÅÜ°Êªº³qª¾«ü¼Ğ
+            mHeading = values[0]; // æŒ‡å®šè§’åº¦æ•¸æ“šçµ¦ mHeading è®Šæ•¸
+            invalidate(); // æ¸…ç©ºè§’åº¦æ•¸æ“šæœ‰è®Šå‹•çš„é€šçŸ¥æŒ‡æ¨™
         }
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas)
     {
-        canvas.save(Canvas.MATRIX_SAVE_FLAG); // Àx¦s¥Ø«eªº¯x°}¼Ğ°O
-        canvas.rotate(-1 * mHeading, getWidth() * 0.5f, getHeight() * 0.5f); // ±ÛÂàµe¥¬
+        canvas.save(Canvas.MATRIX_SAVE_FLAG); // å„²å­˜ç›®å‰çš„çŸ©é™£æ¨™è¨˜
+        canvas.rotate(-1 * mHeading, getWidth() * 0.5f, getHeight() * 0.5f); // æ—‹è½‰ç•«å¸ƒ
         
-        mCanvas.delegate = canvas; // «ü©w¥Ø«eµe¥¬µ¹¦Û©wµe¥¬ª«¥ó¤ºªº°Ñ¼Æ
-        super.dispatchDraw(mCanvas); // ¬£°e¦Û©wµe¥¬
-        canvas.restore(); // ÁÙ­ì¯x°}¼Ğ°O
+        mCanvas.delegate = canvas; // æŒ‡å®šç›®å‰ç•«å¸ƒçµ¦è‡ªå®šç•«å¸ƒç‰©ä»¶å…§çš„åƒæ•¸
+        super.dispatchDraw(mCanvas); // æ´¾é€è‡ªå®šç•«å¸ƒ
+        canvas.restore(); // é‚„åŸçŸ©é™£æ¨™è¨˜
     }
 
     @Override
@@ -62,14 +62,14 @@ public class RotateView extends ViewGroup implements SensorListener
         for (int i = 0; i < count; i++) 
         {
             final View view = getChildAt(i);
-            final int childWidth = view.getMeasuredWidth(); // «ü©w¤l¹Ï¼e«×¬° View ¹ê´ú¼e«×
-            final int childHeight = view.getMeasuredHeight(); // «ü©w¤l¹Ï°ª«×¬° View ªº¹ê´ú°ª«×
-            final int childLeft = (width - childWidth) / 2; // «ü©w¤l¹Ï¥ªÃä¬É¼e«×
-            final int childTop = (height - childHeight) / 2; // «ü©w¤l¹Ï¤WÃä¬É¼e«×
+            final int childWidth = view.getMeasuredWidth(); // æŒ‡å®šå­åœ–å¯¬åº¦ç‚º View å¯¦æ¸¬å¯¬åº¦
+            final int childHeight = view.getMeasuredHeight(); // æŒ‡å®šå­åœ–é«˜åº¦ç‚º View çš„å¯¦æ¸¬é«˜åº¦
+            final int childLeft = (width - childWidth) / 2; // æŒ‡å®šå­åœ–å·¦é‚Šç•Œå¯¬åº¦
+            final int childTop = (height - childHeight) / 2; // æŒ‡å®šå­åœ–ä¸Šé‚Šç•Œå¯¬åº¦
             
             view.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
-            // ­«·s«ü©w View ªº Layout ªº ¥ª.¤W.¥k.¤U.ºİÂI®y¼Ğ.
-            // ¬Û·í©ó±N Map Âà¦V«á, ¦b Map ¹Ï¤W­«¤Á¥X¤@¶ô¥¿¦Vªºª½¨¤ªø¤è§Î¹Ï.
+            // é‡æ–°æŒ‡å®š View çš„ Layout çš„ å·¦.ä¸Š.å³.ä¸‹.ç«¯é»åº§æ¨™.
+            // ç›¸ç•¶æ–¼å°‡ Map è½‰å‘å¾Œ, åœ¨ Map åœ–ä¸Šé‡åˆ‡å‡ºä¸€å¡Šæ­£å‘çš„ç›´è§’é•·æ–¹å½¢åœ–.
         }
     }
 
@@ -80,13 +80,13 @@ public class RotateView extends ViewGroup implements SensorListener
         int h = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
         int sizeSpec;
         
-        if (w > h)// ¦p¬O ¼e¤j©ó°ª 
+        if (w > h)// å¦‚æ˜¯ å¯¬å¤§æ–¼é«˜ 
         {        	
-            sizeSpec = MeasureSpec.makeMeasureSpec((int) (w * SQ2), MeasureSpec.EXACTLY); // ¥H width * 2 ªº¥­¤è®Úºâ¥X¹ê´ú¤Ø¤o
+            sizeSpec = MeasureSpec.makeMeasureSpec((int) (w * SQ2), MeasureSpec.EXACTLY); // ä»¥ width * 2 çš„å¹³æ–¹æ ¹ç®—å‡ºå¯¦æ¸¬å°ºå¯¸
         } 
-        else // ¦p«D ¼e¤j©ó°ª
+        else // å¦‚é å¯¬å¤§æ–¼é«˜
         {        	
-            sizeSpec = MeasureSpec.makeMeasureSpec((int) (h * SQ2), MeasureSpec.EXACTLY); // ¥H height * 2 ªº¥­¤è®Úºâ¥X¹ê´ú¤Ø¤o
+            sizeSpec = MeasureSpec.makeMeasureSpec((int) (h * SQ2), MeasureSpec.EXACTLY); // ä»¥ height * 2 çš„å¹³æ–¹æ ¹ç®—å‡ºå¯¦æ¸¬å°ºå¯¸
         }
         final int count = getChildCount();
         

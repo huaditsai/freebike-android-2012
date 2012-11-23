@@ -1,8 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name="hello">Hello World</string>
     <string name="app_name">FreeBike</string>
-    <string name="title_activity_main">FreeBike</string>
-    <string name="rotate_start">導航模式</string>
-    <string name="rotate_stop">地圖模式</string>
-
+    <string name="searchLabel">搜尋地圖</string>
 </resources>
