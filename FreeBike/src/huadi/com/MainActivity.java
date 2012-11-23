@@ -44,6 +44,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
@@ -62,7 +63,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	private OverlayItem overlayitem = null;
 	private String query;
 	public GeoPoint locPoint; //搜尋或是長按的位置
-	public GeoPoint myPoint;
+	public GeoPoint myPoint; //我的位置
 	
 	private BikeOverlay bikeOverlay;
 	Drawable pin; //地圖上的釘點圖
@@ -81,6 +82,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	
 	TextView txtTmer;
 	CountDownTimer countDownTimer; //計時器
+	boolean isTimerRuning = false;
 	
 	public final int MSG_VIEW_LONGPRESS = 10001;
 	public final int MSG_VIEW_ADDRESSNAME = 10002;
@@ -117,8 +119,8 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
         mylongPressDrawable = getResources().getDrawable(R.drawable.dest); //長按的位置
         
         mapView = (MapView) findViewById(R.id.map_view);
-		mapView.setBuiltInZoomControls(true);
-		mapView.setClickable(true);
+		mapView.setBuiltInZoomControls(true); //顯示縮放按鈕
+		mapView.setClickable(true); //可滑動地圖
 		
 		initPopView();
 		mapController = mapView.getController();
@@ -137,6 +139,12 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		myLocationMgr = MyLocationMgr.getInstance();
 		
 		myTimer();
+
+		List<Overlay> overlays = mapView.getOverlays(); //自己的位置層
+		MyLocationOverlay myLocationOverlay = new MyLocationOverlay(this, mapView); 
+		overlays.add(myLocationOverlay);
+		myLocationOverlay.enableCompass(); 
+		myLocationOverlay.enableMyLocation(); 
     }
     
     
@@ -166,14 +174,14 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	public void onCurrentLocation(Location location) 
 	{
 		myPoint = new GeoPoint((int) (location.getLatitude() * 1E6),(int) (location.getLongitude() * 1E6));
-		overlayitem = new OverlayItem(myPoint, "我的位置", "");
+		//overlayitem = new OverlayItem(myPoint, "我的位置", "");
 		mapController.setZoom(16);
-		if(myLocationItemized.size() > 0)
-		{
-			myLocationItemized.removeOverlay(0);
-		}
-		myLocationItemized.addOverlay(overlayitem);
-		mapOverlays.add(myLocationItemized);
+//		if(myLocationItemized.size() > 0)
+//		{
+//			myLocationItemized.removeOverlay(0);
+//		}
+		//myLocationItemized.addOverlay(overlayitem);
+		//mapOverlays.add(myLocationItemized);
 		mapController.animateTo(myPoint);
 		
 		if(locPoint != null)
@@ -337,7 +345,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	
 	
 	@Override
-	public void onClick(View v) //處理三個button的事件
+	public void onClick(View v) //處理4個button的事件
 	{
 		switch (v.getId()) 
 		{
@@ -365,8 +373,17 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 				break;
 				
 			case R.id.btn_timer: //計時器
-				countDownTimer.cancel();
-				countDownTimer.start();
+				if(isTimerRuning)
+				{
+					countDownTimer.cancel();
+					txtTmer.setText("30:00");
+					isTimerRuning =! isTimerRuning;
+				}
+				else 
+				{
+					countDownTimer.start();
+					isTimerRuning =! isTimerRuning;
+				}				
 				break;
 			
 			default:
@@ -402,7 +419,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		}
 	}
 	
-	private void myTimer()
+	private void myTimer()//計時器
 	{
 		countDownTimer = new CountDownTimer(30*60*1000, 1000)//計時30分鐘震動提醒
     	{
@@ -414,7 +431,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
     			if(millisUntilFinished / 1000 / 60 == 5)
     			{
     				myVibrator.vibrate(3000);
-    				Toast.makeText(MainActivity.this, "remaining 5 min", Toast.LENGTH_LONG).show();
+    				Toast.makeText(MainActivity.this, "Remaining 5 min", Toast.LENGTH_LONG).show();
     			}    				
     		}
     		public void onFinish() 
@@ -454,17 +471,14 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	}
 	
 	@Override
-	public boolean onSearchRequested(){
-		//打開浮動搜索框（第一個參數默認添加到搜索框的值）      
+	public boolean onSearchRequested(){ //打開搜尋欄   
 		startSearch(null, false, null, false);
 		return true;
 	}
-	
-	
 
-	//得到搜尋結果
+	
 	@Override
-	public void onNewIntent(Intent intent)
+	public void onNewIntent(Intent intent)//得到搜尋結果
 	{
 		super.onNewIntent(intent);
 		
@@ -548,7 +562,6 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		myLocationMgr.destoryLocationManager();
 	}
