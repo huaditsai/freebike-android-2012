@@ -1,6 +1,4 @@
-package huadi.com.Route;
 
-import huadi.com.map.MyItemizedOverlay;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
-public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
+class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 {
 	private final String mapAPI = "http://maps.google.com/maps/api/directions/json?" //Google Directions API
 									+ "origin={0}&destination={1}&language=zh-TW&sensor=true&mode=walking";
@@ -69,7 +67,7 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 				strResult = EntityUtils.toString(httpResponse.getEntity());
 
 				JSONObject jsonObject = new JSONObject(strResult);
-				JSONArray routeObject = jsonObject.getJSONArray("routes");//route 會指出具名的路線 (例如「US 101」)
+				JSONArray routeObject = jsonObject.getJSONArray("routes");//route �|��X��W�����u (�Ҧp�uUS 101�v)
 				String polyline = routeObject.getJSONObject(0).getJSONObject("overview_polyline").getString("points");
 
 				if (polyline.length() > 0)
@@ -86,12 +84,12 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 	}
 
 	//https://developers.google.com/maps/documentation/utilities/polylinealgorithm?hl=zh-TW
-	private void decodePolylines(String poly)//對類似這樣 myywCkv~dVQzSIlDA~DEvIMlPAvAf@@ 的東西解碼
+	private void decodePolylines(String poly)//������o�� myywCkv~dVQzSIlDA~DEvIMlPAvAf@@ ���F��ѽX
 	{
 		int len = poly.length();
 		int index = 0;
-		int lat = 0;//緯度
-		int lng = 0;//經度
+		int lat = 0;//�n��
+		int lng = 0;//�g��
 
 		while (index < len)
 		{
@@ -128,15 +126,12 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 	{
 		if (points.size() > 0)
 		{
-			DrawRouteOverlay drawRoute = new DrawRouteOverlay(points);
+			DrawOverlay mOverlay = new DrawOverlay(points);
 
 			List<Overlay> overlays = mapView.getOverlays();
-			
 			//overlays.clear();
-			overlays.remove(0);
-			
 			overlays.add(mylayer);
-			overlays.add(0, drawRoute);
+			overlays.add(0, mOverlay);
 		}
 	}
 

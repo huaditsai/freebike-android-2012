@@ -18,6 +18,7 @@ public class LongPressOverlay extends Overlay implements OnDoubleTapListener,OnG
 	private MapView mMapView;
 	private Handler mHandler;
 	private MapController mMapCtrl;
+	@SuppressWarnings("deprecation")
 	private GestureDetector gestureScanner = new GestureDetector(this);
 	private int level = 0;
 	

@@ -1,13 +1,11 @@
 package huadi.com;
 
-
-import huadi.com.R;
 import huadi.com.Route.BikeOverlay;
 import huadi.com.Route.GoogleDirection;
-import huadi.com.map.MyLocationMgr;
-import huadi.com.map.MyLocationMgr.LocationCallBack;
 import huadi.com.map.LongPressOverlay;
 import huadi.com.map.MyItemizedOverlay;
+import huadi.com.map.MyLocationMgr;
+import huadi.com.map.MyLocationMgr.LocationCallBack;
 import huadi.com.map.SearchSuggestionProvider;
 import huadi.com.utils.CommonHelper;
 
@@ -32,6 +30,7 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -48,6 +47,7 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
+
 @SuppressLint("HandlerLeak")
 public class MainActivity  extends MapActivity implements LocationCallBack ,OnClickListener
 {
@@ -58,6 +58,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	private Drawable mylongPressDrawable;
 	private MyLocationMgr myLocationMgr;
 	private MyItemizedOverlay myLocationItemized;//我的位置層
+	MyLocationOverlay myLocationOverlay;
 	private MyItemizedOverlay mLongPressItemized; //長按時間層
 	private List<Overlay> mapOverlays;
 	private OverlayItem overlayitem = null;
@@ -95,7 +96,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);        
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         
         //旋轉地圖---------
@@ -141,12 +142,18 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		myTimer();
 
 		List<Overlay> overlays = mapView.getOverlays(); //自己的位置層
-		MyLocationOverlay myLocationOverlay = new MyLocationOverlay(this, mapView); 
+		myLocationOverlay = new MyLocationOverlay(this, mapView); 
 		overlays.add(myLocationOverlay);
 		myLocationOverlay.enableCompass(); 
 		myLocationOverlay.enableMyLocation(); 
     }
     
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) 
+    {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
     
     private void initPopView()
     {
@@ -361,7 +368,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 				try
 				{
 					GeoPoint minPoint = BikeOverlay.minDistience(myPoint);//最近的站點
-					new GoogleDirection(myLocationItemized, mapView).execute(
+					new GoogleDirection(myLocationOverlay, mapView).execute(
 							myPoint.getLatitudeE6()/1E6 + "," + myPoint.getLongitudeE6()/1E6,
 							minPoint.getLatitudeE6()/1E6 + "," + minPoint.getLongitudeE6()/1E6);
 				}
@@ -405,7 +412,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 				for(int i = 1 ; i < route.size(); i++)
 					ways += "%7C" + route.get(i).getLatitudeE6()/ 1E6 + "," + route.get(i).getLongitudeE6()/ 1E6;
 			
-			new GoogleDirection(myLocationItemized, mapView).execute(
+			new GoogleDirection(myLocationOverlay, mapView).execute(
 					from.getLatitudeE6()/1E6+","+from.getLongitudeE6()/1E6,
 					dest.getLatitudeE6()/1E6+","+dest.getLongitudeE6()/1E6+
 					"&waypoints=" + route.get(0).getLatitudeE6()/ 1E6 + "," + route.get(0).getLongitudeE6()/ 1E6+
@@ -413,7 +420,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		}
 		else 
 		{
-			new GoogleDirection(myLocationItemized, mapView).execute(
+			new GoogleDirection(myLocationOverlay, mapView).execute(
 					from.getLatitudeE6()/1E6+","+from.getLongitudeE6()/1E6,
 					dest.getLatitudeE6()/1E6+","+dest.getLongitudeE6()/1E6);
 		}
@@ -443,6 +450,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
     	};
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void RotateMap(boolean compassMode)//旋轉地圖
 	{
 		if (compassMode)
@@ -553,6 +561,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		// remember the compass mode state
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onStop()
 	{

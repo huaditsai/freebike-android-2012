@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
     <LinearLayout
+        android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#F00F0F0F"
@@ -51,7 +51,7 @@
             android:layout_marginLeft="10dp"
             android:background="@drawable/maptitlebtn"
             android:src="@drawable/timer" />
-        
+
         <TextView
             android:id="@+id/txtTimer"
             android:layout_width="wrap_content"
@@ -60,26 +60,26 @@
             android:gravity="center_vertical|fill_horizontal"
             android:text="00:00"
             android:textSize="30dp" />
-
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rotating_view"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/linearLayout1"
         android:layout_weight="8.24" >
 
         <com.google.android.maps.MapView
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/map_view"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:apiKey="0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"
             android:clickable="true"
-            android:enabled="true" />
-        <!-- DEBUG : 0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA -->
-    	<!-- Export : 0XKrp4dJ2ko7aETu9iR_FRc3-vqfxTCtxpjbTSA -->
-        
+            android:enabled="true" >
+        </com.google.android.maps.MapView>
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
