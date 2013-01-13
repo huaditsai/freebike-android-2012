@@ -398,7 +398,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 	    	case R.id.menu_about:
 	    		new AlertDialog.Builder(this)
 	    		.setTitle("Ãö©ó")
-	    		.setMessage("Huadi")
+	    		.setMessage("huadi73@gmail.com")
 	    		.show();
 	    		return true;
 	    	default:

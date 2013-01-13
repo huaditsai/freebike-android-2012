@@ -19,6 +19,8 @@
             android:clickable="true"
             android:enabled="true" >
         </com.google.android.maps.MapView>
+        <!-- DEBUG : 0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA -->
+    	<!-- Export : 0XKrp4dJ2ko7aETu9iR_FRc3-vqfxTCtxpjbTSA -->
     </LinearLayout>
     
     <TextView
