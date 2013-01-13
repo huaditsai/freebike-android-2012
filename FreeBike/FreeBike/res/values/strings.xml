@@ -1,0 +1,7 @@
+<resources>
+    <string name="hello">Hello World</string>
+    <string name="app_name">FreeBike</string>
+    <string name="searchLabel">搜尋地圖</string>
+    <string name="menu_about">關於</string>
+    <string name="timer">00:00</string>
+</resources>

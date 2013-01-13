@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_about"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/menu_about"/>
+    <item
+        android:id="@+id/menu_search"
+        android:icon="@drawable/search_w"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/menu_loction"
+        android:icon="@drawable/loction_w"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/menu_nearbike"
+        android:icon="@drawable/nearbike_w"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/menu_timer"
+        android:icon="@drawable/timer_w"
+        android:showAsAction="always"/>
+
+</menu>

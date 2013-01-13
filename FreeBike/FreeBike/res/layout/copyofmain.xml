@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#F00F0F0F"
+        android:baselineAligned="false"
+        android:gravity="fill_horizontal|center"
+        android:orientation="horizontal"
+        android:visibility="invisible" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/icon" />
+
+        <ImageButton
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/maptitlebtn"
+            android:src="@drawable/search" />
+
+        <ImageButton
+            android:id="@+id/btn_loction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/maptitlebtn"
+            android:src="@drawable/loction" />
+
+        <ImageButton
+            android:id="@+id/btn_nearbike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|fill_horizontal"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/maptitlebtn"
+            android:src="@drawable/nearbike" />
+
+        <ImageButton
+            android:id="@+id/btn_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|fill_horizontal"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/maptitlebtn"
+            android:src="@drawable/timer" />
+        
+        <TextView
+            android:id="@+id/txtTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:gravity="center_vertical|fill_horizontal"
+            android:text="00:00"
+            android:textSize="30dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/rotating_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="161.29" >
+
+        <com.google.android.maps.MapView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/map_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:apiKey="0XKrp4dJ2ko56MQU06zceVRaushjMvFfsgmTsHA"
+            android:clickable="true"
+            android:enabled="true" >
+        </com.google.android.maps.MapView>
+    </LinearLayout>
+
+</LinearLayout>
