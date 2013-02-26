@@ -2,7 +2,6 @@ package huadi.com;
 
 import huadi.com.Route.BikeOverlay;
 import huadi.com.Route.GoogleDirection;
-import huadi.com.Route.RealTimeBike;
 import huadi.com.map.LongPressOverlay;
 import huadi.com.map.MyItemizedOverlay;
 import huadi.com.map.MyLocationMgr;
@@ -19,27 +18,24 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.Vibrator;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,11 +76,6 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 	private RotateView rotateView;
 	//--------------
 	
-//	ImageButton loction_Btn; //旋轉地圖
-//	ImageButton timer_Btn; //計時
-//	ImageButton nearbike_Btn; //最近站點
-//	ImageButton search_btn; //搜尋地圖
-	
 	TextView txtTmer;
 	CountDownTimer countDownTimer; //計時器
 	boolean isTimerRuning = false;
@@ -95,6 +86,8 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 	public final int MSG_VIEW_LOCATIONLATLNG = 10003;
 	public final int MSG_VIEW_LOCATIONLATLNG_FAIL = 10005;
 	
+	WakeLock wakeLock;//keep wake up
+	
 	
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -103,22 +96,15 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         
+        PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);//防止螢幕暗掉
+        wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "huadi");        
+        wakeLock.acquire();
+        
         //旋轉地圖---------
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		rotateViewLinearLayout = (LinearLayout) findViewById(R.id.rotating_view);
 		rotateView = new RotateView(this);
 		//-------------------
-        
-//        loction_Btn = (ImageButton)findViewById(R.id.btn_loction);
-//    	timer_Btn = (ImageButton)findViewById(R.id.btn_timer);
-//    	nearbike_Btn = (ImageButton)findViewById(R.id.btn_nearbike);
-//    	loction_Btn = (ImageButton)findViewById(R.id.btn_loction);
-//    	search_btn = (ImageButton)findViewById(R.id.btn_search);
-//    	
-//    	loction_Btn.setOnClickListener(this);
-//    	timer_Btn.setOnClickListener(this);
-//    	nearbike_Btn.setOnClickListener(this);
-//    	search_btn.setOnClickListener(this);
     	
         myLocationDrawable = getResources().getDrawable(R.drawable.arrow); //自己
         mylongPressDrawable = getResources().getDrawable(R.drawable.dest); //長按的位置
@@ -296,15 +282,15 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 								else
 									break;								
 							}
-							if(!"".equals(addressName) || count < 5){
+							if(!"".equals(addressName) || count < 5)
+							{
 								Message msg = new Message();
 								msg.what = MSG_VIEW_ADDRESSNAME;
 								msg.obj = addressName;
 								mHandler.sendMessage(msg);
 							}
 						}
-					}
-					).start();
+					}).start();
 					overlayitem = new OverlayItem(locPoint, "位置名稱","載入中...");
 					if(mLongPressItemized.size() > 0)
 						mLongPressItemized.removeOverlay(0);
@@ -338,7 +324,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 						mLongPressItemized.removeOverlay(0);
 					}
 					
-					BikeDire(myPoint,locPoint);
+					BikeDire(myPoint,locPoint);//畫路線到目的地
 					
 					popView.setVisibility(View.GONE);
 					mLongPressItemized.addOverlay(overlayitem);
@@ -350,7 +336,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 					
 				case MSG_VIEW_LOCATIONLATLNG_FAIL:
 					CommonHelper.closeProgress();
-					Toast.makeText(MainActivity.this, "搜尋地址失敗", Toast.LENGTH_SHORT).show();
+					Toast.makeText(MainActivity.this, "搜尋失敗", Toast.LENGTH_SHORT).show();
 					break;
 			}
 		}
@@ -405,54 +391,6 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 	            return super.onOptionsItemSelected(item);
 	    }
 	}
-	
-	
-//	@Override
-//	public void onClick(View v) //處理4個button的事件
-//	{
-//		switch (v.getId()) 
-//		{
-//			case R.id.btn_search://搜尋
-//				onSearchRequested();
-//				break;
-//				
-//			case R.id.btn_loction://旋轉地圖
-//				RotateMap(isRotateMode);
-//				break;				
-//			
-//			case R.id.btn_nearbike://最近站點
-//				try
-//				{
-//					GeoPoint minPoint = BikeOverlay.minDistience(myPoint);//最近的站點
-//					new GoogleDirection(myLocationOverlay, mapView).execute(
-//							myPoint.getLatitudeE6()/1E6 + "," + myPoint.getLongitudeE6()/1E6,
-//							minPoint.getLatitudeE6()/1E6 + "," + minPoint.getLongitudeE6()/1E6);
-//				}
-//				catch (Exception e)
-//				{
-//					Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
-//				}
-//				
-//				break;
-//				
-//			case R.id.btn_timer: //計時器
-//				if(isTimerRuning)
-//				{
-//					countDownTimer.cancel();
-//					txtTmer.setText("00:00");
-//					isTimerRuning =! isTimerRuning;
-//				}
-//				else 
-//				{
-//					countDownTimer.start();
-//					isTimerRuning =! isTimerRuning;
-//				}				
-//				break;
-//			
-//			default:
-//				break;
-//		}
-//	}
 	
 	public void BikeDire(GeoPoint from, GeoPoint dest) //路線規劃
 	{
@@ -601,12 +539,16 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 	public void onResume()
 	{
 		super.onResume();
+		wakeLock.acquire();
+		if(myPoint != null)
+			mapController.animateTo(myPoint);
 	}
 
 	@Override
 	public void onPause()
 	{
 		super.onPause();
+		wakeLock.release();
 	}
 
 	@Override
@@ -629,6 +571,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack //,On
 	protected void onDestroy() {
 		super.onDestroy();
 		myLocationMgr.destoryLocationManager();
+		wakeLock.release();
 	}
 	
 	@Override //繼承 MapActivity 必需實作 isRouteDisplayed 方法
