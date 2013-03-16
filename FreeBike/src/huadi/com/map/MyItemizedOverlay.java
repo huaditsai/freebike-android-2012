@@ -26,8 +26,8 @@ public class MyItemizedOverlay extends ItemizedOverlay implements OnFocusChangeL
 	private List<OverlayItem> overlays = new ArrayList<OverlayItem>();
 	private GeoPoint point = null;
 	private String desc = "";
-	private int layout_x = 0; // ç”¨æ–¼è¨­ç½®popview ç›¸å°æŸå€‹ä½ç½®å‘xè»¸åç§»
-	private int layout_y = -30; // ç”¨æ–¼è¨­ç½®popview ç›¸å°æŸå€‹ä½ç½®å‘xè»¸åç§»
+	private int layout_x = 0; // ¥Î©ó³]¸mpopview ¬Û¹ï¬Y­Ó¦ì¸m¦Vx¶b°¾²¾
+	private int layout_y = -30; // ¥Î©ó³]¸mpopview ¬Û¹ï¬Y­Ó¦ì¸m¦Vx¶b°¾²¾
 	
 	private MapView mMapView;
 	private MapController mMapCtrl;
@@ -94,8 +94,8 @@ public class MyItemizedOverlay extends ItemizedOverlay implements OnFocusChangeL
 		if (null != newFocus) 
 		{
 			MapView.LayoutParams params = (MapView.LayoutParams) mPopView.getLayoutParams();
-			params.x = this.layout_x;//Yè»¸åç§»
-			params.y = this.layout_y;//Yè»¸åç§»
+			params.x = this.layout_x;//Y¶b°¾²¾
+			params.y = this.layout_y;//Y¶b°¾²¾
 			point = newFocus.getPoint();
 			params.point = point;
 			mMapCtrl.animateTo(point);
@@ -120,7 +120,7 @@ public class MyItemizedOverlay extends ItemizedOverlay implements OnFocusChangeL
 	}
 	
 	@Override
-	public void onClick(View v) //æŒ‰ä¸‹å½ˆå‡ºçš„æ³¡æ³¡æ™‚
+	public void onClick(View v) //«ö¤U¼u¥Xªºªwªw®É
 	{
 		switch (v.getId()) 
 		{

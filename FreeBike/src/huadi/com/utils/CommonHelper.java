@@ -4,7 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 
 
-public class CommonHelper  //æœå°‹æ™‚çš„é€²åº¦åœˆ
+public class CommonHelper  //·j´M®Éªº¶i«×°é
 {
 	private static ProgressDialog mProgress;
 	

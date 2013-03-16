@@ -15,7 +15,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
 
-public class DrawRouteOverlay extends Overlay //ç”¨ä¾†ç•«è¦åŠƒå‡ºçš„è·¯ç·š
+public class DrawRouteOverlay extends Overlay //¥Î¨Óµe³W¹º¥Xªº¸ô½u
 {
 	private List<GeoPoint> mGeoPoints = new ArrayList<GeoPoint>();
 	private final Path path;
@@ -35,19 +35,19 @@ public class DrawRouteOverlay extends Overlay //ç”¨ä¾†ç•«è¦åŠƒå‡ºçš„è·¯ç·š
 	{
 		super.draw(canvas, mapView, shadow);
 		
-		paint.setColor(Color.argb(120, 70, 50, 200));//é¡è‰²
-		paint.setAlpha(120);//é€æ˜åº¦
+		paint.setColor(Color.argb(120, 70, 50, 200));//ÃC¦â
+		paint.setAlpha(120);//³z©ú«×
 		paint.setAntiAlias(true);
-		paint.setStrokeWidth(10);//é‚Šçš„å¯¬åº¦
-		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(10);//Ãäªº¼e«×
+		paint.setStyle(Paint.Style.STROKE);//ªÅ¤ßªºµ§
 
-		Projection proj = mapView.getProjection();//æŠ•å½±
+		Projection proj = mapView.getProjection();//§ë¼v
 		path.rewind();
 		Iterator<GeoPoint> it = mGeoPoints.iterator();
 		proj.toPixels(it.next(), p);
 		path.moveTo(p.x, p.y);
 
-		while (it.hasNext())//å¦‚æœæœ‰ä¸‹ä¸€å€‹é»å°±ç•«éå»
+		while (it.hasNext())//¦pªG¦³¤U¤@­ÓÂI´Nµe¹L¥h
 		{
 			proj.toPixels(it.next(), p);
 			path.lineTo(p.x, p.y);

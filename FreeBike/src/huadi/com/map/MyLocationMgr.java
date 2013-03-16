@@ -34,12 +34,12 @@ public class MyLocationMgr
 	
 	private MyLocationMgr() 
 	{
-		// Gps å®šä½
+		// Gps ©w¦ì
 		gpsLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
 		//Location gpsLocation = gpsLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		gpsLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,MINTIME, MININSTANCE, locationListener);
         
-		// ç¶²è·¯å®šä½
+		// ºô¸ô©w¦ì
 		networkLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
 		//Location networkLocation = gpsLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		networkLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MINTIME, MININSTANCE,locationListener);
@@ -63,19 +63,19 @@ public class MyLocationMgr
 	
 	private final LocationListener locationListener = new LocationListener() 
 	{
-		@Override //ç•¶GPSæˆ–ç¶²è·¯ç‹€æ…‹æ”¹è®Š
+		@Override //·íGPS©Îºô¸ôª¬ºA§ïÅÜ
 		public void onStatusChanged(String provider, int status, Bundle extras) {
 		}
 
-		@Override //ç•¶GPSæˆ–ç¶²è·¯é–‹å•Ÿ
+		@Override //·íGPS©Îºô¸ô¶}±Ò
 		public void onProviderEnabled(String provider) {
 		}
 
-		@Override //ç•¶GPSæˆ–ç¶²è·¯é—œé–‰
+		@Override //·íGPS©Îºô¸ôÃö³¬
 		public void onProviderDisabled(String provider) {
 		}
 
-		@Override //ç•¶åœ°é»æ”¹è®Š
+		@Override //·í¦aÂI§ïÅÜ
 		public void onLocationChanged(Location location) 
 		{
 			updateLocation(location);

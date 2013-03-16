@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.Service;
 import android.content.Intent;
@@ -27,14 +28,14 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.Vibrator;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,9 +48,8 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-
 @SuppressLint("HandlerLeak")
-public class MainActivity  extends MapActivity implements LocationCallBack ,OnClickListener
+public class MainActivity  extends MapActivity implements LocationCallBack //,OnClickListener
 {
 	private MapView mapView;
 	private MapController mapController;
@@ -57,32 +57,27 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	private Drawable myLocationDrawable;
 	private Drawable mylongPressDrawable;
 	private MyLocationMgr myLocationMgr;
-	private MyItemizedOverlay myLocationItemized;//æˆ‘çš„ä½ç½®å±¤
+	private MyItemizedOverlay myLocationItemized;//§Úªº¦ì¸m¼h
 	MyLocationOverlay myLocationOverlay;
-	private MyItemizedOverlay mLongPressItemized; //é•·æŒ‰æ™‚é–“å±¤
+	private MyItemizedOverlay mLongPressItemized; //ªø«ö®É¶¡¼h
 	private List<Overlay> mapOverlays;
 	private OverlayItem overlayitem = null;
 	private String query;
-	public GeoPoint locPoint; //æœå°‹æˆ–æ˜¯é•·æŒ‰çš„ä½ç½®
-	public GeoPoint myPoint; //æˆ‘çš„ä½ç½®
+	public GeoPoint locPoint; //·j´M©Î¬Oªø«öªº¦ì¸m
+	public GeoPoint myPoint; //§Úªº¦ì¸m
 	
 	private BikeOverlay bikeOverlay;
-	Drawable pin; //åœ°åœ–ä¸Šçš„é‡˜é»åœ–
+	Drawable pin; //¦a¹Ï¤Wªº°vÂI¹Ï
 	
-	//æ—‹è½‰åœ°åœ–---------
+	//±ÛÂà¦a¹Ï---------
 	private boolean isRotateMode = false;
 	private SensorManager sensorManager;
 	private LinearLayout rotateViewLinearLayout;
 	private RotateView rotateView;
 	//--------------
 	
-	ImageButton loction_Btn; //æ—‹è½‰åœ°åœ–
-	ImageButton timer_Btn; //è¨ˆæ™‚
-	ImageButton nearbike_Btn; //æœ€è¿‘ç«™é»
-	ImageButton search_btn; //æœå°‹åœ°åœ–
-	
 	TextView txtTmer;
-	CountDownTimer countDownTimer; //è¨ˆæ™‚å™¨
+	CountDownTimer countDownTimer; //­p®É¾¹
 	boolean isTimerRuning = false;
 	
 	public final int MSG_VIEW_LONGPRESS = 10001;
@@ -90,6 +85,8 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	public final int MSG_VIEW_ADDRESSNAME_FAIL = 10004;
 	public final int MSG_VIEW_LOCATIONLATLNG = 10003;
 	public final int MSG_VIEW_LOCATIONLATLNG_FAIL = 10005;
+	
+	WakeLock wakeLock;//keep wake up
 	
 	
     @Override
@@ -99,29 +96,22 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         
-        //æ—‹è½‰åœ°åœ–---------
+        PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);//¨¾¤î¿Ã¹õ·t±¼
+        wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "huadi");        
+        wakeLock.acquire();
+        
+        //±ÛÂà¦a¹Ï---------
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		rotateViewLinearLayout = (LinearLayout) findViewById(R.id.rotating_view);
 		rotateView = new RotateView(this);
 		//-------------------
-        
-        loction_Btn = (ImageButton)findViewById(R.id.btn_loction);
-    	timer_Btn = (ImageButton)findViewById(R.id.btn_timer);
-    	nearbike_Btn = (ImageButton)findViewById(R.id.btn_nearbike);
-    	loction_Btn = (ImageButton)findViewById(R.id.btn_loction);
-    	search_btn = (ImageButton)findViewById(R.id.btn_search);
     	
-    	loction_Btn.setOnClickListener(this);
-    	timer_Btn.setOnClickListener(this);
-    	nearbike_Btn.setOnClickListener(this);
-    	search_btn.setOnClickListener(this);
-    	
-        myLocationDrawable = getResources().getDrawable(R.drawable.arrow); //è‡ªå·±
-        mylongPressDrawable = getResources().getDrawable(R.drawable.dest); //é•·æŒ‰çš„ä½ç½®
+        myLocationDrawable = getResources().getDrawable(R.drawable.arrow); //¦Û¤v
+        mylongPressDrawable = getResources().getDrawable(R.drawable.dest); //ªø«öªº¦ì¸m
         
         mapView = (MapView) findViewById(R.id.map_view);
-		mapView.setBuiltInZoomControls(true); //é¡¯ç¤ºç¸®æ”¾æŒ‰éˆ•
-		mapView.setClickable(true); //å¯æ»‘å‹•åœ°åœ–
+		mapView.setBuiltInZoomControls(true); //Åã¥ÜÁY©ñ«ö¶s
+		mapView.setClickable(true); //¥i·Æ°Ê¦a¹Ï
 		
 		initPopView();
 		mapController = mapView.getController();
@@ -132,8 +122,8 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		
 		BikeStationPin();
 		
-		//ä»¥å°åŒ—å¸‚æ”¿åºœç‚ºä¸­å¿ƒ
-		GeoPoint cityLocPoint = new GeoPoint(25037642,12156377);
+		//¥H¥x¥_¥«¬F©²¬°¤¤¤ß
+		GeoPoint cityLocPoint = new GeoPoint((int)(25.037642 * 1E6),(int)(121.56377 * 1E6));
 		mapController.animateTo(cityLocPoint);
 		mapController.setZoom(12);
 		MyLocationMgr.init(MainActivity.this.getApplicationContext() , MainActivity.this, myLocationItemized, mapView);
@@ -141,11 +131,12 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		
 		myTimer();
 
-		List<Overlay> overlays = mapView.getOverlays(); //è‡ªå·±çš„ä½ç½®å±¤
+		List<Overlay> overlays = mapView.getOverlays(); //¦Û¤vªº¦ì¸m¼h
 		myLocationOverlay = new MyLocationOverlay(this, mapView); 
 		overlays.add(myLocationOverlay);
 		myLocationOverlay.enableCompass(); 
 		myLocationOverlay.enableMyLocation(); 
+
     }
     
     @Override
@@ -171,9 +162,9 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
     
     public void BikeStationPin()
     {
-    	pin = getResources().getDrawable(R.drawable.bike_pin);//åœ°åœ–ä¸Šçš„é‡˜é»åœ–
-		pin.setBounds(-pin.getMinimumWidth()/2, -pin.getMinimumHeight(), 0, 0);//ä»¥åœ–ç‰‡ä¸­ä¸‹ç‚ºåŸºæº–
-		bikeOverlay = new BikeOverlay(pin,this);
+    	pin = getResources().getDrawable(R.drawable.bike_pin);//¦a¹Ï¤Wªº°vÂI¹Ï
+		pin.setBounds(-pin.getMinimumWidth()/2, -pin.getMinimumHeight(), 0, 0);//¥H¹Ï¤ù¤¤¤U¬°°ò·Ç
+		bikeOverlay = new BikeOverlay(pin,MainActivity.this);
 		mapOverlays.add(bikeOverlay);
     }    
 	
@@ -181,7 +172,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	public void onCurrentLocation(Location location) 
 	{
 		myPoint = new GeoPoint((int) (location.getLatitude() * 1E6),(int) (location.getLongitude() * 1E6));
-		//overlayitem = new OverlayItem(myPoint, "æˆ‘çš„ä½ç½®", "");
+		//overlayitem = new OverlayItem(myPoint, "§Úªº¦ì¸m", "");
 		mapController.setZoom(16);
 //		if(myLocationItemized.size() > 0)
 //		{
@@ -196,7 +187,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	}
 	
 	
-	private String getLocationAddress(GeoPoint point)// é€šéç¶“ç·¯åº¦å¾—åˆ°åœ°å€
+	private String getLocationAddress(GeoPoint point)// ³q¹L¸g½n«×±o¨ì¦a§}
 	{
 		String add = "";
 		Geocoder geoCoder = new Geocoder(getBaseContext(),Locale.getDefault());
@@ -226,14 +217,15 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	
 	private Address searchLocationByName(String addressName)
 	{
-		Geocoder geoCoder = new Geocoder(getBaseContext(),Locale.TAIWAN);
+		Geocoder geoCoder = new Geocoder(getBaseContext(), Locale.TAIWAN);
 		try 
 		{
 			List<Address> addresses = geoCoder.getFromLocationName(addressName, 1);
 			Address address_send = null;
 			for(Address address : addresses)
 			{
-				locPoint = new GeoPoint((int)(address.getLatitude() * 1E6), (int)(address.getLongitude() * 1E6));
+				locPoint = new GeoPoint((int)(address.getLatitude() * 1E6), 
+						(int)(address.getLongitude() * 1E6));
 				address.getAddressLine(1);
 				address_send = address;
 			}
@@ -256,7 +248,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		{
 			switch (msg.what) 
 			{
-				case MSG_VIEW_LONGPRESS: //ç•¶é•·æŒ‰æ™‚
+				case MSG_VIEW_LONGPRESS: //·íªø«ö®É
 					if(null == locPoint) return;
 					new Thread( new Runnable() 
 					{
@@ -278,7 +270,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 								}
 								count++;
 								addressName = getLocationAddress(locPoint);
-								if("".equals(addressName) && count > 5)//5æ¬¡æ²’å¾—åˆ°åœ°å€å°±ç®—äº†
+								if("".equals(addressName) && count > 5)//5¦¸¨S±o¨ì¦a§}´Nºâ¤F
 								{
 									Message msg1 = new Message();
 									msg1.what = MSG_VIEW_ADDRESSNAME_FAIL;
@@ -290,16 +282,16 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 								else
 									break;								
 							}
-							if(!"".equals(addressName) || count < 5){
+							if(!"".equals(addressName) || count < 5)
+							{
 								Message msg = new Message();
 								msg.what = MSG_VIEW_ADDRESSNAME;
 								msg.obj = addressName;
 								mHandler.sendMessage(msg);
 							}
 						}
-					}
-					).start();
-					overlayitem = new OverlayItem(locPoint, "ä½ç½®åç¨±","è¼‰å…¥ä¸­...");
+					}).start();
+					overlayitem = new OverlayItem(locPoint, "¦ì¸m¦WºÙ","¸ü¤J¤¤...");
 					if(mLongPressItemized.size() > 0)
 						mLongPressItemized.removeOverlay(0);
 					
@@ -311,15 +303,15 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 					mapView.invalidate();
 					break;
 					
-				case MSG_VIEW_ADDRESSNAME:	//å¾—åˆ°åœ°å€å¾Œé¡¯ç¤ºåœ¨å½ˆè·³æ¡†ä¸Š		
+				case MSG_VIEW_ADDRESSNAME:	//±o¨ì¦a§}«áÅã¥Ü¦b¼u¸õ®Ø¤W		
 					TextView desc = (TextView) popView.findViewById(R.id.map_bubbleText);
 					desc.setText((String)msg.obj);
 					popView.setVisibility(View.VISIBLE);
 					break;
 					
-				case MSG_VIEW_ADDRESSNAME_FAIL: //å¾—ä¸åˆ°åœ°å€åç¨±
+				case MSG_VIEW_ADDRESSNAME_FAIL: //±o¤£¨ì¦a§}¦WºÙ
 					TextView desc1 = (TextView) popView.findViewById(R.id.map_bubbleText);
-					desc1.setText("ç„¡æ³•å¾—ä½ç½®");
+					desc1.setText("µLªk±o¦ì¸m");
 					popView.setVisibility(View.VISIBLE);
 					break;
 					
@@ -332,7 +324,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 						mLongPressItemized.removeOverlay(0);
 					}
 					
-					BikeDire(myPoint,locPoint);
+					BikeDire(myPoint,locPoint);//µe¸ô½u¨ì¥Øªº¦a
 					
 					popView.setVisibility(View.GONE);
 					mLongPressItemized.addOverlay(overlayitem);
@@ -344,30 +336,28 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 					
 				case MSG_VIEW_LOCATIONLATLNG_FAIL:
 					CommonHelper.closeProgress();
-					Toast.makeText(MainActivity.this, "æœå°‹åœ°å€å¤±æ•—", Toast.LENGTH_SHORT).show();
+					Toast.makeText(MainActivity.this, "·j´M¥¢±Ñ", Toast.LENGTH_SHORT).show();
 					break;
 			}
 		}
 	};
 	
-	
 	@Override
-	public void onClick(View v) //è™•ç†4å€‹buttonçš„äº‹ä»¶
+	public boolean onOptionsItemSelected(MenuItem item) 
 	{
-		switch (v.getId()) 
-		{
-			case R.id.btn_search://æœå°‹
-				onSearchRequested();
-				break;
-				
-			case R.id.btn_loction://æ—‹è½‰åœ°åœ–
-				RotateMap(isRotateMode);
-				break;				
-			
-			case R.id.btn_nearbike://æœ€è¿‘ç«™é»
-				try
+	    // Handle item selection
+	    switch (item.getItemId()) 
+	    {
+	    	case R.id.menu_search://·j´M
+	    		onSearchRequested();
+	    		return true;
+	    	case R.id.menu_loction://±ÛÂà¦a¹Ï
+	    		RotateMap(isRotateMode);
+	    		return true;
+	    	case R.id.menu_nearbike://³Ìªñ¯¸ÂI
+	    		try
 				{
-					GeoPoint minPoint = BikeOverlay.minDistience(myPoint);//æœ€è¿‘çš„ç«™é»
+					GeoPoint minPoint = BikeOverlay.minDistience(myPoint);//³Ìªñªº¯¸ÂI
 					new GoogleDirection(myLocationOverlay, mapView).execute(
 							myPoint.getLatitudeE6()/1E6 + "," + myPoint.getLongitudeE6()/1E6,
 							minPoint.getLatitudeE6()/1E6 + "," + minPoint.getLongitudeE6()/1E6);
@@ -376,29 +366,33 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 				{
 					Toast.makeText(this, "No location found", Toast.LENGTH_LONG).show();
 				}
-				
-				break;
-				
-			case R.id.btn_timer: //è¨ˆæ™‚å™¨
-				if(isTimerRuning)
+	    		return true;
+	    	case R.id.menu_timer://­p®É¾¹
+	    		if(isTimerRuning)
 				{
 					countDownTimer.cancel();
-					txtTmer.setText("30:00");
+					txtTmer.setText("00:00");
 					isTimerRuning =! isTimerRuning;
 				}
 				else 
 				{
 					countDownTimer.start();
 					isTimerRuning =! isTimerRuning;
-				}				
-				break;
-			
-			default:
-				break;
-		}
+				}
+	    		return true;
+	    		
+	    	case R.id.menu_about:
+	    		new AlertDialog.Builder(this)
+	    		.setTitle("Ãö©ó")
+	    		.setMessage("huadi73@gmail.com")
+	    		.show();
+	    		return true;
+	    	default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 	
-	public void BikeDire(GeoPoint from, GeoPoint dest) //è·¯ç·šè¦åŠƒ
+	public void BikeDire(GeoPoint from, GeoPoint dest) //¸ô½u³W¹º
 	{
 		List<GeoPoint> route = new ArrayList<GeoPoint>();
 		String ways = "";
@@ -408,7 +402,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		
 		if(route.size() > 0)
 		{
-			if(route.size() > 1) // "7C" æ˜¯ "|" çš„16é€²ä½ï¼Œå› urlç‰¹æ®Šå­—å…ƒå•é¡Œï¼ŒåŠ å­—çš„è©±æ˜¯åŠ  "%"
+			if(route.size() > 1) // "7C" ¬O "|" ªº16¶i¦ì¡A¦]url¯S®í¦r¤¸°İÃD¡A¥[¦rªº¸Ü¬O¥[ "%"
 				for(int i = 1 ; i < route.size(); i++)
 					ways += "%7C" + route.get(i).getLatitudeE6()/ 1E6 + "," + route.get(i).getLongitudeE6()/ 1E6;
 			
@@ -426,15 +420,15 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 		}
 	}
 	
-	private void myTimer()//è¨ˆæ™‚å™¨
+	private void myTimer()//­p®É¾¹
 	{
-		countDownTimer = new CountDownTimer(30*60*1000, 1000)//è¨ˆæ™‚30åˆ†é˜éœ‡å‹•æé†’
+		countDownTimer = new CountDownTimer(30*60*1000, 1000)//­p®É30¤ÀÄÁ¾_°Ê´£¿ô
     	{
-    		Vibrator myVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);//å–å¾—éœ‡å‹•æœå‹™
+    		Vibrator myVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);//¨ú±o¾_°ÊªA°È
     		public void onTick(long millisUntilFinished) 
     		{
     			txtTmer = (TextView)findViewById(R.id.txtTimer);
-    			txtTmer.setText(""+ millisUntilFinished / 1000 / 60 +":"+(millisUntilFinished / 1000) % 60);
+    			txtTmer.setText( millisUntilFinished / 1000 / 60 + ":" + (millisUntilFinished / 1000) % 60);
     			if(millisUntilFinished / 1000 / 60 == 5)
     			{
     				myVibrator.vibrate(3000);
@@ -451,7 +445,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	}
 	
 	@SuppressWarnings("deprecation")
-	private void RotateMap(boolean compassMode)//æ—‹è½‰åœ°åœ–
+	private void RotateMap(boolean compassMode)//±ÛÂà¦a¹Ï
 	{
 		if (compassMode)
 		{
@@ -479,24 +473,24 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	}
 	
 	@Override
-	public boolean onSearchRequested(){ //æ‰“é–‹æœå°‹æ¬„   
+	public boolean onSearchRequested(){ //¥´¶}·j´MÄæ   
 		startSearch(null, false, null, false);
 		return true;
 	}
 
 	
 	@Override
-	public void onNewIntent(Intent intent)//å¾—åˆ°æœå°‹çµæœ
+	public void onNewIntent(Intent intent)//±o¨ì·j´Mµ²ªG
 	{
 		super.onNewIntent(intent);
 		
-		query = intent.getStringExtra(SearchManager.QUERY);//ç²å¾—æœå°‹æ¡†è£¡çš„å€¼
-		//ä¿å­˜æœå°‹è¨˜éŒ„
+		query = intent.getStringExtra(SearchManager.QUERY);//Àò±o·j´M®Ø¸Ìªº­È
+		//«O¦s·j´M°O¿ı
 		SearchRecentSuggestions suggestions=new SearchRecentSuggestions(this,
 				SearchSuggestionProvider.AUTHORITY, SearchSuggestionProvider.MODE);
 		suggestions.saveRecentQuery(query, null);
 		
-		CommonHelper.showProgress(this, "æ­£åœ¨æœå°‹: " + query);
+		CommonHelper.showProgress(this, "¥¿¦b·j´M: " + query);
 		new Thread(new Runnable() 
 		{
 			@Override
@@ -517,7 +511,7 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 					}
 					address = searchLocationByName(query);
 					
-					if(address == null && count > 5) //æœå°‹ä¸åˆ°æˆ–è¶…é5æ¬¡ å°±èªªå¤±æ•—äº†
+					if(address == null && count > 5) //·j´M¤£¨ì©Î¶W¹L5¦¸ ´N»¡¥¢±Ñ¤F
 					{
 						Message msg1 = new Message();
 						msg1.what = MSG_VIEW_LOCATIONLATLNG_FAIL;
@@ -545,12 +539,16 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	public void onResume()
 	{
 		super.onResume();
+		wakeLock.acquire();
+		if(myPoint != null)
+			mapController.animateTo(myPoint);
 	}
 
 	@Override
 	public void onPause()
 	{
 		super.onPause();
+		wakeLock.release();
 	}
 
 	@Override
@@ -573,9 +571,10 @@ public class MainActivity  extends MapActivity implements LocationCallBack ,OnCl
 	protected void onDestroy() {
 		super.onDestroy();
 		myLocationMgr.destoryLocationManager();
+		wakeLock.release();
 	}
 	
-	@Override //ç¹¼æ‰¿ MapActivity å¿…éœ€å¯¦ä½œ isRouteDisplayed æ–¹æ³•
+	@Override //Ä~©Ó MapActivity ¥²»İ¹ê§@ isRouteDisplayed ¤èªk
 	protected boolean isRouteDisplayed() {
 		return false;
 	}

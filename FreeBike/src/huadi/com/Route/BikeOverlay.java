@@ -6,151 +6,116 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.widget.Toast;
-
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
 public class BikeOverlay extends ItemizedOverlay<OverlayItem>
 {	
-	//å®£å‘Šitemsåˆ—è¡¨ï¼Œè² è²¬å„²å­˜åœ–æ¨™åˆ—è¡¨
+	//«Å§iitems¦Cªí¡A­t³dÀx¦s¹Ï¼Ğ¦Cªí
 	private static List<OverlayItem> items = new ArrayList<OverlayItem>();
-	Context mcontext;//ç‚ºäº†ç”¨MainActivityå«Toastç­‰
-	
-	//GeoPoint  = new GeoPoint( (int)( * 1000000), (int)( * 1000000) );
-	GeoPoint Taipei_Medical_University = new GeoPoint( (int)(25.026691 * 1000000), (int)(121.561725 * 1000000) );
-	GeoPoint FuDe_Park = new GeoPoint( (int)(25.038118 * 1000000), (int)(121.583652 * 1000000) );
-	GeoPoint Rongxing_Park = new GeoPoint( (int)(25.064249 * 1000000), (int)(121.540297 * 1000000) );
-	GeoPoint Raoho_Street = new GeoPoint( (int)(25.049833 * 1000000), (int)(121.57189 * 1000000) );
-	GeoPoint Songshan_High_School_of_Commerce_and_Home_Economics = new GeoPoint( (int)(25.036096 * 1000000), (int)(121.579116 * 1000000) );	
-	GeoPoint Guangfu_Rd_Minsheng_St = new GeoPoint( (int)(25.058437 * 1000000), (int)(121.555046 * 1000000) );
-	GeoPoint Taipei_Municipal_Stadium = new GeoPoint( (int)(25.048271 * 1000000), (int)(121.552246 * 1000000) );
-	GeoPoint ZhongQiang_park = new GeoPoint( (int)(25.029214 * 1000000), (int)(121.569774 * 1000000) );
-	GeoPoint Technology_Bldg_station = new GeoPoint( (int)(25.025911 * 1000000), (int)(121.54329 * 1000000) );
-	GeoPoint Minsheng_East_Rd_Dunhua_North_Rd = new GeoPoint( (int)(25.058002 * 1000000), (int)(121.548987 * 1000000) );
-	
-	GeoPoint Songshan_Train_Station = new GeoPoint( (int)(25.048643 * 1000000), (int)(121.578062 * 1000000) );
-	GeoPoint Dongxin_Elementary_School = new GeoPoint( (int)(25.05504 * 1000000), (int)(121.602792 * 1000000) );
-	GeoPoint Ta_an_Forest_Park = new GeoPoint( (int)(25.033117 * 1000000), (int)(121.537461 * 1000000) );
-	GeoPoint Yongji_Rd_Somgxin_Rd = new GeoPoint( (int)(25.045401 * 1000000), (int)(121.572035 * 1000000) );
-	GeoPoint Kunyajg_station_Exit1 = new GeoPoint( (int)(25.050154 * 1000000), (int)(121.592374 * 1000000) );
-	GeoPoint Taipei_Nangang_exhibition_canter_station_Exit5 = new GeoPoint( (int)(25.05478 * 1000000), (int)(121.616686 * 1000000) );
-	GeoPoint WuChang_Park = new GeoPoint( (int)(25.048147 * 1000000), (int)(121.574707 * 1000000) );
-	GeoPoint Aiguo_E_Rd_Jinshan_South_Rd = new GeoPoint( (int)(25.03168 * 1000000), (int)(121.526548 * 1000000) );
-	GeoPoint Zhangxing_St_Jilong_Rd = new GeoPoint( (int)(25.017059 * 1000000), (int)(121.544384 * 1000000) );
-	GeoPoint Xinsheng_South_Rd_Jianguo_Elevated_Rd_ = new GeoPoint( (int)(25.022404 * 1000000), (int)(121.534589 * 1000000) );
-	
-	GeoPoint Liuzhangli_station = new GeoPoint( (int)(25.023906 * 1000000), (int)(121.55316 * 1000000) );
-	GeoPoint Zhonglun_High_School = new GeoPoint( (int)(25.048786 * 1000000), (int)(121.560885 * 1000000) );
-	GeoPoint Xingtian_temple_station_Exit1 = new GeoPoint( (int)(25.058364 * 1000000), (int)(121.532929 * 1000000) );
-	GeoPoint Xingtian_temple_station_Exit3 = new GeoPoint( (int)(25.060002 * 1000000), (int)(121.533315 * 1000000) );
-	GeoPoint NTU_Information_Building = new GeoPoint( (int)(25.021013 * 1000000), (int)(121.541509 * 1000000) );
-	GeoPoint Dongmen_Station_Exit5 = new GeoPoint( (int)(25.033698 * 1000000), (int)(121.529163 * 1000000) );
-	GeoPoint National_Taiwan_Normal_University_of_Library = new GeoPoint( (int)(25.026684 * 1000000), (int)(121.528924 * 1000000) );
-	GeoPoint Nangang_Park = new GeoPoint( (int)(25.05801 * 1000000), (int)(121.614237 * 1000000) );
-	GeoPoint Yucheng_Park = new GeoPoint( (int)(25.042913 * 1000000), (int)(121.586398 * 1000000) );
-	GeoPoint Academia_Park = new GeoPoint( (int)(25.047425 * 1000000), (int)(121.613693 * 1000000) );
-	
-	GeoPoint Taipei_City_Hall_Station_2 = new GeoPoint( (int)(25.040898 * 1000000), (int)(121.567851 * 1000000) );
-
-	GeoPoint Taipei_City_Hall_Station_1 = new GeoPoint( (int)(25.0408388889 * 1000000), (int)(121.567894444 * 1000000) );
-	GeoPoint Sun_Yet_Sen_Memorial_Hall_Station = new GeoPoint( (int)(25.0410833333 * 1000000), (int)(121.5578 * 1000000) );
-	GeoPoint Taipei_City_Government  = new GeoPoint( (int)( 25.0377972222 * 1000000), (int)(121.565169444 * 1000000) );
-	GeoPoint Taipei_City_Hall_Plaza = new GeoPoint( (int)(25.0360361111 * 1000000), (int)(121.562325 * 1000000) );
-	GeoPoint Xingya_Jr_High_School = new GeoPoint( (int)(25.0365638889 * 1000000), (int)(121.568663889 * 1000000) );	
-	GeoPoint New_York_New_York_Greenway = new GeoPoint( (int)(25.0347361111 * 1000000), (int)(121.565658333 * 1000000) );
-	GeoPoint Xinyi_Square = new GeoPoint( (int)(25.0330388889 * 1000000), (int)(121.565619444 * 1000000) );
-	GeoPoint TWTC_Exhibition_Hall = new GeoPoint( (int)(25.0352138889 * 1000000), (int)(121.563688889 * 1000000) );
-	GeoPoint Exit_C_of_the_World_Trade_Center = new GeoPoint( (int)(25.033943 * 1000000), (int)(121.562959 * 1000000) );
-	GeoPoint Taipei_City_Disaster_Response_Center = new GeoPoint( (int)(25.0286611111 * 1000000), (int)(121.566116667 * 1000000) );
-	
-	GeoPoint San_Zhang_Li = new GeoPoint( (int)(25.0335472222 * 1000000), (int)(121.557594444 * 1000000) );
+	Context mcontext;//¬°¤F¥ÎMainActivity¥sToastµ¥
 	
 	public BikeOverlay(Drawable defaultMarker, Context context)
 	{
 		super(boundCenterBottom(defaultMarker));
 		mcontext = context;
 		//items.add(new OverlayItem( , null, null));
-		items.add(new OverlayItem(Taipei_Medical_University, null, "è‡ºåŒ—é†«å­¸å¤§å­¸"));
-		items.add(new OverlayItem(FuDe_Park, null, "ç¦å¾·å…¬åœ’"));
-		items.add(new OverlayItem(Rongxing_Park, null, "æ¦®æ˜ŸèŠ±åœ’"));
-		items.add(new OverlayItem(Raoho_Street, null, "é¥’æ²³å¤œå¸‚"));
-		items.add(new OverlayItem(Songshan_High_School_of_Commerce_and_Home_Economics, null, "æ¾å±±å®¶å•†"));
-		items.add(new OverlayItem(Guangfu_Rd_Minsheng_St, null, "æ°‘ç”Ÿå…‰å¾©è·¯å£"));
-		items.add(new OverlayItem(Taipei_Municipal_Stadium, null, "ç¤¾æ•™é¤¨"));
-		items.add(new OverlayItem(ZhongQiang_park, null, "ä¸­å¼·å…¬åœ’"));
-		items.add(new OverlayItem(Technology_Bldg_station, null, "æ·é‹ç§‘æŠ€å¤§æ¨“ç«™"));
-		items.add(new OverlayItem(Minsheng_East_Rd_Dunhua_North_Rd, null, "æ°‘ç”Ÿæ•¦åŒ–è·¯å£"));
+		items.add(new OverlayItem(new GeoPoint((int)( 25.04069468907246 * 1E6), (int)( 121.5681683642343 * 1E6)), null, " ±¶¹B¥«¬F©²¯¸-1 " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.04088571490804 * 1E6), (int)( 121.56779266584367 * 1E6)), null, " ±¶¹B¥«¬F©²¯¸-2 " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.04111348947239 * 1E6), (int)( 121.55769540482456 * 1E6)), null, " ±¶¹B°ê¤÷¬ö©ÀÀ]¯¸ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.03782651877072 * 1E6), (int)( 121.56506328727501 * 1E6)), null, " ¥x¥_¥«¬F©² " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.03606779365894 * 1E6), (int)( 121.56221115798536 * 1E6)), null, " ¥«¥Á¼s³õ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.036594412178673 * 1E6), (int)( 121.56855574131255 * 1E6)), null, " ¿³¶®°ê¤¤ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.034764132394546 * 1E6), (int)( 121.56554471140144 * 1E6)), null, " ¥@¶T¤GÀ] " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.033066973944376 * 1E6), (int)( 121.565507190323 * 1E6)), null, " «H¸q¼s³õ(¥x¥_101) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.035241070168134 * 1E6), (int)( 121.5635749016442 * 1E6)), null, " ¥@¶T¤TÀ] " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.03161611202749 * 1E6), (int)( 121.57424048770635 * 1E6)), null, " ªQ¼w¯¸ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.028686377226254 * 1E6), (int)( 121.56601225797743 * 1E6)), null, " ¥x¥_¥«¨a®`À³ÅÜ¤¤¤ß " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.034965983739394 * 1E6), (int)( 121.55750901082726 * 1E6)), null, " ¤T±i²p " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.02670772774701 * 1E6), (int)( 121.5616333592187 * 1E6)), null, " »O¥_Âå¾Ç¤j¾Ç " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.038116282130073 * 1E6), (int)( 121.58355624268788 * 1E6)), null, " ºÖ¼w¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.064271952365335 * 1E6), (int)( 121.54025630977732 * 1E6)), null, " ºa¬Pªá¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.049871545632893 * 1E6), (int)( 121.57177857940214 * 1E6)), null, " ÄÇªe©]¥« " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.03611165737906 * 1E6), (int)( 121.57902796696253 * 1E6)), null, " ªQ¤s®a°Ó " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.058430866710818 * 1E6), (int)( 121.55492930530143 * 1E6)), null, " ¥Á¥Í¥ú´_¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.04829346066766 * 1E6), (int)( 121.55216808351058 * 1E6)), null, " ªÀ±ĞÀ] " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.028654260535745 * 1E6), (int)( 121.56969826374642 * 1E6)), null, " ¤¤±j¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.025927544292166 * 1E6), (int)( 121.5431795944545 * 1E6)), null, " ±¶¹B¬ì§Ş¤j¼Ó¯¸ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.058010962247003 * 1E6), (int)( 121.54887155101419 * 1E6)), null, " ¥Á¥Í´°¤Æ¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.048646809758274 * 1E6), (int)( 121.57798684426102 * 1E6)), null, " ªQ¤s¨®¯¸ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.05510322925814 * 1E6), (int)( 121.6026859323695 * 1E6)), null, " ªF·s°ê¤p " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.03295455312573 * 1E6), (int)( 121.53736404171498 * 1E6)), null, " «H¸q«Ø°ê¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.045456161782845 * 1E6), (int)( 121.57193645568783 * 1E6)), null, " ¥Ã¦NªQ«H¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.050170578439644 * 1E6), (int)( 121.59226544257453 * 1E6)), null, " ±¶¹B©ø¶§¯¸(1¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.054721271230257 * 1E6), (int)( 121.61657936996238 * 1E6)), null, " ±¶¹B«n´ä®iÄıÀ]¯¸(5¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.048163512984416 * 1E6), (int)( 121.57456542722157 * 1E6)), null, " ¤­±`¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.031666440227198 * 1E6), (int)( 121.52643837876819 * 1E6)), null, " ª÷¤s·R°ê¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.0170850305129 * 1E6), (int)( 121.5442404184872 * 1E6)), null, " °ò¶©ªø¿³¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.02243810547205 * 1E6), (int)( 121.53445459901121 * 1E6)), null, " ¨¯¥è·s¥Í¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.023914028595726 * 1E6), (int)( 121.55304964674367 * 1E6)), null, " ±¶¹B¤»±i²p¯¸ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.04881203503207 * 1E6), (int)( 121.5607629407459 * 1E6)), null, " ¤¤±[°ª¤¤ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.058394315318914 * 1E6), (int)( 121.53282664956555 * 1E6)), null, " ±¶¹B¦æ¤Ñ®c¯¸(1¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.060009059167772 * 1E6), (int)( 121.53319046053814 * 1E6)), null, " ±¶¹B¦æ¤Ñ®c¯¸(3¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.021040636031064 * 1E6), (int)( 121.54142407611846 * 1E6)), null, " »O¤j¸ê°T¤j¼Ó " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.033724635778558 * 1E6), (int)( 121.52905336581387 * 1E6)), null, " ±¶¹BªFªù¯¸(4¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.026674570363703 * 1E6), (int)( 121.52877536254647 * 1E6)), null, " »OÆW®v½d¤j¾Ç(¹Ï®ÑÀ]) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.058026758312945 * 1E6), (int)( 121.61410819143059 * 1E6)), null, " «n´ä¥@¶T¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.042899477425454 * 1E6), (int)( 121.58629429016747 * 1E6)), null, " ¥É¦¨¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.047456924654274 * 1E6), (int)( 121.61359957066833 * 1E6)), null, " ¤¤¬ã¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.044335191685846 * 1E6), (int)( 121.58163339656824 * 1E6)), null, " ±¶¹B«á¤s°ñ¯¸(1¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.035664335224485 * 1E6), (int)( 121.61404619523384 * 1E6)), null, " ­â¶³¥«³õ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.059761031923042 * 1E6), (int)( 121.61607931675222 * 1E6)), null, " ±¶¹B«n´ä³nÅé¶é°Ï¯¸(2¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.014791264830727 * 1E6), (int)( 121.53443134570222 * 1E6)), null, " ±¶¹B¤½À]¯¸(2¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.05648705610769 * 1E6), (int)( 121.61091901185264 * 1E6)), null, " «n´ä°ê¤p " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.04195061481608 * 1E6), (int)( 121.53375637914878 * 1E6)), null, " ±¶¹B©¾§µ·s¥Í(3¸¹¥X¤f) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.052499170864973 * 1E6), (int)( 121.60809443518042 * 1E6)), null, " «n´ä¨®¯¸ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.0409323093464 * 1E6), (int)( 121.54814132762766 * 1E6)), null, " Àsªù¼s³õ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.062031858438456 * 1E6), (int)( 121.56007981536945 * 1E6)), null, " ¥ÁÅv¹B°Ê¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.06506139063163 * 1E6), (int)( 121.53666173151323 * 1E6)), null, " «Ø°ê¹A¦wµó¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.054786752625606 * 1E6), (int)( 121.53681513005522 * 1E6)), null, " «Ø°êªø¬K¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.04481170702603 * 1E6), (int)( 121.5365040408787 * 1E6)), null, " ¤K¼w¥«³õ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.028826499225342 * 1E6), (int)( 121.53796039416068 * 1E6)), null, " »O¥_¥«¥ß¹Ï®ÑÀ](Á`À]) " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.049531912898946 * 1E6), (int)( 121.54929953361969 * 1E6)), null, " »O¥_¥Ğ®|³õ " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.03898511205985 * 1E6), (int)( 121.52222823410845 * 1E6)), null, " Y-17«C¤Ö¦~¨|¼Ö¤¤¤ß " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.02624579199454 * 1E6), (int)( 121.53507555672431 * 1E6)), null, " ·s¥Í©M¥­¸ô¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.045296341206114 * 1E6), (int)( 121.52208653162768 * 1E6)), null, " ±¶¹Bµ½¾É¦x¯¸1¸¹¥X¤f " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.052253425794856 * 1E6), (int)( 121.52569390263257 * 1E6)), null, " ªL´Ë¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.064341920940436 * 1E6), (int)( 121.53337774681597 * 1E6)), null, " ¤¤¤s¦æ¬F¤¤¤ß " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.013129430832958 * 1E6), (int)( 121.53961582846784 * 1E6)), null, " ¥xÆW¬ì§Ş¤j¾Ç " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.026858447878375 * 1E6), (int)( 121.52014548568899 * 1E6)), null, " «n©÷¤½¶é " )); 
+		items.add(new OverlayItem(new GeoPoint((int)( 25.037592474365535 * 1E6), (int)( 121.5455201939277 * 1E6)), null, " ¤¯·RÂå°| " )); 
 		
-		items.add(new OverlayItem(Songshan_Train_Station, null, "æ¾å±±è»Šç«™"));
-		items.add(new OverlayItem(Dongxin_Elementary_School, null, "æ±æ–°åœ‹å°"));
-		items.add(new OverlayItem(Ta_an_Forest_Park, null, "å¤§å®‰æ£®æ—å…¬åœ’"));
-		items.add(new OverlayItem(Yongji_Rd_Somgxin_Rd, null, "æ°¸å‰æ¾ä¿¡è·¯å£"));
-		items.add(new OverlayItem(Kunyajg_station_Exit1, null, "æ·é‹æ˜†é™½ç«™(1è™Ÿå‡ºå£)"));
-		items.add(new OverlayItem(Taipei_Nangang_exhibition_canter_station_Exit5, null, "æ·é‹å—æ¸¯å±•è¦½é¤¨ç«™(5è™Ÿå‡ºå£)"));
-		items.add(new OverlayItem(WuChang_Park, null, "äº”å¸¸å…¬åœ’"));
-		items.add(new OverlayItem(Aiguo_E_Rd_Jinshan_South_Rd, null, "é‡‘å±±æ„›åœ‹è·¯å£"));
-		items.add(new OverlayItem(Zhangxing_St_Jilong_Rd, null, "åŸºéš†é•·èˆˆè·¯å£"));
-		items.add(new OverlayItem(Xinsheng_South_Rd_Jianguo_Elevated_Rd_, null, "è¾›äº¥æ–°ç”Ÿè·¯å£"));
-		
-		items.add(new OverlayItem(Liuzhangli_station, null, "æ·é‹å…­å¼µçŠç«™"));
-		items.add(new OverlayItem(Zhonglun_High_School, null, "ä¸­å´™é«˜ä¸­"));
-		items.add(new OverlayItem(Xingtian_temple_station_Exit1, null, "æ·é‹è¡Œå¤©å®®ç«™(1è™Ÿå‡ºå£)"));
-		items.add(new OverlayItem(Xingtian_temple_station_Exit3, null, "æ·é‹è¡Œå¤©å®®ç«™(3è™Ÿå‡ºå£)"));
-		items.add(new OverlayItem(NTU_Information_Building, null, "è‡ºå¤§è³‡è¨Šå¤§æ¨“"));
-		items.add(new OverlayItem(Dongmen_Station_Exit5, null, "æ·é‹æ±é–€ç«™(5è™Ÿå‡ºå£)"));
-		items.add(new OverlayItem(National_Taiwan_Normal_University_of_Library, null, "è‡ºç£å¸«ç¯„å¤§å­¸(åœ–æ›¸é¤¨)"));
-		items.add(new OverlayItem(Nangang_Park, null, "å—æ¸¯ä¸–è²¿å…¬åœ’"));
-		items.add(new OverlayItem(Yucheng_Park, null, "ç‰æˆå…¬åœ’"));
-		items.add(new OverlayItem(Academia_Park, null, "ä¸­ç ”å…¬åœ’"));
-		
-		items.add(new OverlayItem(Taipei_City_Hall_Station_2, null, "æ·é‹å¸‚æ”¿åºœç«™-2"));
-
-		items.add(new OverlayItem(Taipei_City_Hall_Station_1, null, "æ·é‹å¸‚æ”¿åºœç«™"));
-		items.add(new OverlayItem(Sun_Yet_Sen_Memorial_Hall_Station, null, "æ·é‹åœ‹çˆ¶ç´€å¿µé¤¨ç«™"));
-		items.add(new OverlayItem(Taipei_City_Government , null, "è‡ºåŒ—å¸‚æ”¿åºœ"));
-		items.add(new OverlayItem(Taipei_City_Hall_Plaza , null,"å¸‚æ°‘å»£å ´"));
-		items.add(new OverlayItem(Xingya_Jr_High_School , null, "èˆˆé›…åœ‹ä¸­"));		
-		items.add(new OverlayItem(New_York_New_York_Greenway , null, "ç´ç´„ç´ç´„ç¶ åœ’é“"));
-		items.add(new OverlayItem(Xinyi_Square , null, "ä¿¡ç¾©å»£å ´"));
-		items.add(new OverlayItem(TWTC_Exhibition_Hall , null, "ä¸–è²¿ä¸‰é¤¨"));
-		items.add(new OverlayItem(Exit_C_of_the_World_Trade_Center , null, "ä¸–è²¿ä¸€é¤¨Cå‡ºå£(æ¾å¾·ç«™)"));
-		items.add(new OverlayItem(Taipei_City_Disaster_Response_Center , null, "å°åŒ—å¸‚ç½å®³æ‡‰è®Šä¸­å¿ƒ"));
-		
-		items.add(new OverlayItem(San_Zhang_Li , null, "ä¸‰å¼µçŠ"));
-		
-		//Gener();
-		
-		populate();//æº–å‚™ItemizedOverlyå»ºæ§‹å¾Œï¼Œæ‰€éœ€çš„è™•ç†å‹•ä½œ
+		populate();//·Ç³ÆItemizedOverly«Øºc«á¡A©Ò»İªº³B²z°Ê§@
 	}
 
 	public void addOverlay(OverlayItem overlay) 
 	{
 		items.add(overlay);
-	    populate();//æº–å‚™ItemizedOverlyå»ºæ§‹å¾Œï¼Œæ‰€éœ€çš„è™•ç†å‹•ä½œ
+	    populate();//·Ç³ÆItemizedOverly«Øºc«á¡A©Ò»İªº³B²z°Ê§@
 	}
 	
 	@Override
-	protected OverlayItem createItem(int i) //è¢«populate()å‘¼å«
-	{//ä¾æ“šåƒæ•¸ i æŠ“å–å°æ‡‰çš„OverlayItemé¡¯ç¤ºåœ¨åœ°åœ–ä¸Š
-	  return items.get(i);
+	protected OverlayItem createItem(int i) //³Qpopulate()©I¥s
+	{//¨Ì¾Ú°Ñ¼Æ i §ì¨ú¹ïÀ³ªºOverlayItemÅã¥Ü¦b¦a¹Ï¤W
+		return items.get(i);
 	}
 
 	@Override
-	public int size() //è¢«populate()å‘¼å«ï¼Œç”¨ä»¥è¨ˆç®—åœ–æ¨™çš„æ•¸é‡
+	public int size() //³Qpopulate()©I¥s¡A¥Î¥H­pºâ¹Ï¼Ğªº¼Æ¶q
 	{
-	  return items.size();
+		return items.size();
 	}
 	
 	@Override
-	protected boolean onTap(int index) //ä½¿ç”¨è€…é»é¸åˆ°åœ–æ¨™æ™‚è§¸ç™¼
+	protected boolean onTap(int index) //¨Ï¥ÎªÌÂI¿ï¨ì¹Ï¼Ğ®ÉÄ²µo
 	{
-		Toast.makeText(mcontext, "é€™è£¡æ˜¯ " + items.get(index).getSnippet(), Toast.LENGTH_SHORT).show();
+		new RealTimeBike(items.get(index).getSnippet(),mcontext).execute(index);
+
 		return true;
 	}
 	
-	public static GeoPoint minDistience(GeoPoint userPoint)//è¨ˆç®—é›¢è‡ªå·±æœ€è¿‘çš„ç§Ÿè³ƒç«™
+	public static GeoPoint minDistience(GeoPoint userPoint)//­pºâÂ÷¦Û¤v³Ìªñªº¯²¸î¯¸
 	{
 		Location locationA = new Location("point A");
 		locationA.setLatitude(userPoint.getLatitudeE6() / 1E6);  
@@ -165,7 +130,7 @@ public class BikeOverlay extends ItemizedOverlay<OverlayItem>
 			locationB.setLatitude(items.get(i).getPoint().getLatitudeE6() / 1E6);  
 			locationB.setLongitude(items.get(i).getPoint().getLongitudeE6() / 1E6);
 			
-			distance[i] = locationA.distanceTo(locationB); //å…¬å°º
+			distance[i] = locationA.distanceTo(locationB); //¤½¤Ø
 		}
 		
 		float min = distance[0];
@@ -182,7 +147,7 @@ public class BikeOverlay extends ItemizedOverlay<OverlayItem>
 		return items.get(minI).getPoint();
 	}
 	
-	public static GeoPoint CloserStation(GeoPoint start, GeoPoint end, List<OverlayItem> station)//æ‰¾èµ·é»åˆ°è»Šç«™+è»Šç«™åˆ°çµ‚é» æœ€è¿‘çš„é»
+	public static GeoPoint CloserStation(GeoPoint start, GeoPoint end, List<OverlayItem> station)//§ä°_ÂI¨ì¨®¯¸+¨®¯¸¨ì²×ÂI ³ÌªñªºÂI
 	{
 		Location start_Location = new Location("point A");
 		Location end_Location = new Location("point B");
@@ -201,7 +166,7 @@ public class BikeOverlay extends ItemizedOverlay<OverlayItem>
 			station_Location.setLatitude(station.get(i).getPoint().getLatitudeE6() / 1E6);  
 			station_Location.setLongitude(station.get(i).getPoint().getLongitudeE6() / 1E6);
 			
-			distance[i] = start_Location.distanceTo(station_Location) + station_Location.distanceTo(end_Location); //èµ·é»åˆ°ç«™+ç«™åˆ°çµ‚é»
+			distance[i] = start_Location.distanceTo(station_Location) + station_Location.distanceTo(end_Location); //°_ÂI¨ì¯¸+¯¸¨ì²×ÂI
 		}
 		
 		float min = distance[0];
@@ -215,17 +180,17 @@ public class BikeOverlay extends ItemizedOverlay<OverlayItem>
 				minI = i;
 			}
 		}
-		return station.get(minI).getPoint();//èµ·é»åˆ°è»Šç«™+è»Šç«™åˆ°çµ‚é» æœ€è¿‘çš„é»
+		return station.get(minI).getPoint();//°_ÂI¨ì¨®¯¸+¨®¯¸¨ì²×ÂI ³ÌªñªºÂI
 	}
 	
-	public static List<GeoPoint> WayStation(GeoPoint start, GeoPoint end, List<OverlayItem> station, List<GeoPoint> route)//æ‰¾å‡ºè·¯ä¸Šçš„è»Šç«™
+	public static List<GeoPoint> WayStation(GeoPoint start, GeoPoint end, List<OverlayItem> station, List<GeoPoint> route)//§ä¥X¸ô¤Wªº¨®¯¸
 	{
-		//å…ˆæ‰¾åˆ° è»Šç«™çµ‚é» æ¯” èµ·é»åˆ°çµ‚é» è¿‘çš„é»
+		//¥ı§ä¨ì ¨®¯¸²×ÂI ¤ñ °_ÂI¨ì²×ÂI ªñªºÂI
 		Location start_Location = new Location("point A");
 		Location end_Location = new Location("point B");
 		Location station_Location = new Location("point C");
 		
-		List<OverlayItem> closer_station = new ArrayList<OverlayItem>();//è»Šç«™çµ‚é» æ¯” èµ·é»åˆ°çµ‚é» è¿‘çš„é» å€‘
+		List<OverlayItem> closer_station = new ArrayList<OverlayItem>();//¨®¯¸²×ÂI ¤ñ °_ÂI¨ì²×ÂI ªñªºÂI ­Ì
 		
 		start_Location.setLatitude(start.getLatitudeE6() / 1E6);  
 		start_Location.setLongitude(start.getLongitudeE6() / 1E6);
@@ -239,9 +204,9 @@ public class BikeOverlay extends ItemizedOverlay<OverlayItem>
 			station_Location.setLongitude(station.get(i).getPoint().getLongitudeE6() / 1E6);
 			
 			if(station_Location.distanceTo(end_Location) < start_Location.distanceTo(end_Location))
-				closer_station.add(station.get(i)); //è»Šç«™çµ‚é» æ¯” èµ·é»åˆ°çµ‚é» è¿‘çš„é» å€‘
+				closer_station.add(station.get(i)); //¨®¯¸²×ÂI ¤ñ °_ÂI¨ì²×ÂI ªñªºÂI ­Ì
 		}		
-		//æ‰¾èµ·é»åˆ°è»Šç«™+è»Šç«™åˆ°çµ‚é» æœ€è¿‘çš„é»
+		//§ä°_ÂI¨ì¨®¯¸+¨®¯¸¨ì²×ÂI ³ÌªñªºÂI
 		if(closer_station.size() > 1)
 		{
 			GeoPoint nearest = CloserStation(start, end, closer_station);		

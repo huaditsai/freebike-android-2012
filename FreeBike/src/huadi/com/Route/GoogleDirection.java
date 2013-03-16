@@ -1,7 +1,5 @@
 package huadi.com.Route;
 
-import huadi.com.map.MyItemizedOverlay;
-
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +25,10 @@ import com.google.android.maps.Overlay;
 
 public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 {
-	private final String mapAPI = "http://maps.google.com/maps/api/directions/json?" //Google Directions API
-									+ "origin={0}&destination={1}&language=zh-TW&sensor=true&mode=walking";
+	private final String mapAPI = 
+		"http://maps.google.com/maps/api/directions/json?" //Google Directions API
+		+ "origin={0}&destination={1}&language=zh-TW&sensor=true&mode=walking";
+	
 	private String from;
 	private String desti;
 	private List<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
@@ -36,7 +36,7 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 	MyLocationOverlay mylayer;
 	MapView mapView;
 	
-	public GoogleDirection(MyLocationOverlay layer,MapView view)
+	public GoogleDirection(MyLocationOverlay layer, MapView view)
 	{
 		mylayer = layer;
 		mapView = view;
@@ -55,6 +55,7 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 		//Log.i("map", url);
 		HttpGet get = new HttpGet(url);
 		String strResult = "";
+		
 		try
 		{
 			HttpParams httpParameters = new BasicHttpParams();
@@ -64,17 +65,18 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 			HttpResponse httpResponse = null;
 			httpResponse = httpClient.execute(get);
 
-			if (httpResponse.getStatusLine().getStatusCode() == 200)
+			if (httpResponse.getStatusLine().getStatusCode() == 200)//ßP¬_∫Ù∏Ù≥s±µ¨Oß_¶®•\
 			{
-				strResult = EntityUtils.toString(httpResponse.getEntity());
-
+				strResult = EntityUtils.toString(httpResponse.getEntity());				
+				//Log.e("strResult", strResult);
+				
 				JSONObject jsonObject = new JSONObject(strResult);
-				JSONArray routeObject = jsonObject.getJSONArray("routes");//route ÊúÉÊåáÂá∫ÂÖ∑ÂêçÁöÑË∑ØÁ∑ö (‰æãÂ¶Ç„ÄåUS 101„Äç)
+				JSONArray routeObject = jsonObject.getJSONArray("routes");//route ∑|´¸•X®„¶W™∫∏ÙΩu (®“¶p°uUS 101°v)
 				String polyline = routeObject.getJSONObject(0).getJSONObject("overview_polyline").getString("points");
 
 				if (polyline.length() > 0)
 				{
-					decodePolylines(polyline);
+					DecodePolylines(polyline);
 				}
 			}
 		}
@@ -82,16 +84,17 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 		{
 			Log.e("map", e.toString());
 		}
+		
 		return geoPoints;
 	}
 
 	//https://developers.google.com/maps/documentation/utilities/polylinealgorithm?hl=zh-TW
-	private void decodePolylines(String poly)//Â∞çÈ°û‰ººÈÄôÊ®£ myywCkv~dVQzSIlDA~DEvIMlPAvAf@@ ÁöÑÊù±Ë•øËß£Á¢º
+	private void DecodePolylines(String poly)//πÔ√˛¶¸≥oºÀ myywCkv~dVQzSIlDA~DEvIMlPAvAf@@ ™∫™F¶Ë∏—ΩX
 	{
 		int len = poly.length();
 		int index = 0;
-		int lat = 0;//Á∑ØÂ∫¶
-		int lng = 0;//Á∂ìÂ∫¶
+		int lat = 0;//Ωn´◊
+		int lng = 0;//∏g´◊
 
 		while (index < len)
 		{
@@ -99,11 +102,11 @@ public class GoogleDirection extends AsyncTask<String, Integer, List<GeoPoint>>
 			do
 			{
 				b = poly.charAt(index++) - 63;
-				result |= (b & 0x1f) << shift;
-				shift += 5;
-			} while (b >= 0x20);
+				result |= (b & 0x1f) << shift; //¬‡¨∞2∂i¶Ï •B ®C 5 ≠”¶Ï§∏§¿¶®§@≠”∞œ∂Ù,´e´·∂∂ß«§]∂∂´KƒA≠À§F
+				shift += 5; //®C 5 ≠”¶Ï§∏§¿¶®§@≠”∞œ∂Ù
+			} while (b >= 0x20); //0x20 ™∫2∂i¶Ï=100000
 			
-			int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+			int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1)); //¶V•k≤æ§@¶Ï§∏,1™∫∏…º∆(1,0¨€§œ)
 			lat += dlat;
 
 			shift = 0;

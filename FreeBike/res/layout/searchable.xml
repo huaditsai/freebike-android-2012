@@ -1,0 +1,8 @@
+<searchable
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:hint="@string/searchLabel" 
+  android:label="@string/searchLabel"
+  android:searchSuggestAuthority="huadi.com.map.SearchSuggestionProvider"
+  android:searchSuggestSelection=" ? ">  
+</searchable>
+
