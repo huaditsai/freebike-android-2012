@@ -8,6 +8,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.RelativeLayout;
@@ -80,6 +81,22 @@ public class MyItemizedOverlay extends ItemizedOverlay implements OnFocusChangeL
 
 	@Override
 	protected boolean onTap(int index) {
+		
+		mPopView.setVisibility(View.VISIBLE);
+		
+		new CountDownTimer(5000,1000) 
+		{	            
+            @Override
+            public void onFinish() 
+            {
+            	mPopView.setVisibility(View.INVISIBLE);
+            }
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // TODO Auto-generated method stub
+            }	            
+        }.start();
+        
 		return super.onTap(index);
 	}
 
@@ -94,8 +111,8 @@ public class MyItemizedOverlay extends ItemizedOverlay implements OnFocusChangeL
 		if (null != newFocus) 
 		{
 			MapView.LayoutParams params = (MapView.LayoutParams) mPopView.getLayoutParams();
-			params.x = this.layout_x;//Y¶b°¾²¾
-			params.y = this.layout_y;//Y¶b°¾²¾
+			params.x = this.layout_x; //Y¶b°¾²¾
+			params.y = this.layout_y; //Y¶b°¾²¾
 			point = newFocus.getPoint();
 			params.point = point;
 			mMapCtrl.animateTo(point);
@@ -116,6 +133,20 @@ public class MyItemizedOverlay extends ItemizedOverlay implements OnFocusChangeL
 			button.setOnClickListener(this);
 			mMapView.updateViewLayout(mPopView, params);
 			mPopView.setVisibility(View.VISIBLE);
+			
+			new CountDownTimer(5000,1000)
+			{	            
+	            @Override
+	            public void onFinish() 
+	            {
+	            	mPopView.setVisibility(View.INVISIBLE);
+	            }
+	            @Override
+	            public void onTick(long millisUntilFinished) {
+	                // TODO Auto-generated method stub
+	            }	            
+	        }.start();	        
+			
 		}
 	}
 	
