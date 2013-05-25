@@ -77,7 +77,7 @@ public class RealTimeBike extends AsyncTask<Integer, Integer, String>
 //		String snaen = "";// 英文名稱
 //		String bemp = "";// 可用車位數
 		
-		Arrays.sort(request, new CustomComparator()); // 照代號排序
+//		Arrays.sort(request, new CustomComparator()); // 照代號排序
 		
 //		try
 //		{
