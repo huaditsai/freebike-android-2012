@@ -69,6 +69,7 @@ public class RealTimeBike extends AsyncTask<Integer, Integer, String>
 		catch(Exception e)
 		{
 			Log.e("Exception",e.toString());
+			info = "測試或維修中...";
 		}
 		finally
         {
@@ -150,7 +151,7 @@ public class RealTimeBike extends AsyncTask<Integer, Integer, String>
 	protected void onPostExecute(String place)
 	{
 		Toast.makeText(mcontext, "這裡是 " + mitems+ 
-				"\r\n目前車位 " + place, Toast.LENGTH_SHORT).show();
+				"\r\n可借車輛 " + place, Toast.LENGTH_SHORT).show();
 	}
 }
 
