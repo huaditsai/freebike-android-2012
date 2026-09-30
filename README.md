@@ -20,6 +20,20 @@ Sources:
 - Cleaned before publication: Subversion metadata folders (`.svn/`) left over from the project's earlier Google Code hosting are removed from every commit because they contained a personal email address.
 - The layouts still contain old Google Maps Android API v1 keys. Google retired that API version years ago; do not reuse the keys.
 
+## Design files
+
+`design/` holds the team's original 2012 to 2013 artwork, added in September 2026 from a local archive:
+
+- App icons, map pins and toolbar buttons: Photoshop sources (`.psd`) and PNG exports.
+- `movie.gif` and `movie.psd`: the in-app demo animation.
+- `Map.png` and two variants: Taipei map drafts with hand-drawn station and route annotations.
+- `device-2013-05-25-235152.png`: a screenshot from a test device.
+- `intro/`: the first-run tutorial overlays (`intro_0.png` to `intro_4.png`), their Photoshop source and three screenshots.
+
+<img src="design/movie.gif" width="240" alt="FreeBike demo animation">
+
+The competition paperwork, APK builds and station data files from the same archive are not included.
+
 ## License
 
 No open-source license was found. Do not assume the repository grants any license; third-party libraries keep their own licenses.
